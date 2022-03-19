@@ -1,0 +1,59 @@
+---
+version: 2.1
+
+orbs:
+  prometheus: prometheus/prometheus@0.15.0
+
+executors:
+  # This must match .promu.yml.
+  golang:
+    docker:
+      - image: circleci/golang:1.17
+
+jobs:
+  test:
+    executor: golang
+
+    steps:
+      - prometheus/setup_environment
+      - run: make
+      - prometheus/store_artifact:
+          file: chrony_exporter
+
+workflows:
+  version: 2
+  chrony_exporter:
+    jobs:
+      - test:
+          filters:
+            tags:
+              only: /.*/
+      - prometheus/build:
+          name: build
+          parallelism: 3
+          promu_opts: "-p linux/amd64 -p windows/amd64 -p linux/arm64 -p darwin/amd64 -p darwin/arm64 -p linux/386"
+          filters:
+            tags:
+              only: /.*/
+      - prometheus/publish_master:
+          context: org-context
+          docker_hub_organization: superque
+          quay_io_organization: superq
+          requires:
+            - test
+            - build
+          filters:
+            branches:
+              only: master
+      - prometheus/publish_release:
+          context: org-context
+          docker_hub_organization: superque
+          quay_io_organization: superq
+          requires:
+            - test
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/

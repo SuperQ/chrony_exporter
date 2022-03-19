@@ -31,10 +31,6 @@ import (
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
-const (
-	namespace = "chrony"
-)
-
 var (
 	listenAddress = kingpin.Flag(
 		"web.listen-address",
