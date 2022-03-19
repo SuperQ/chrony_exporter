@@ -14,6 +14,8 @@
 package collector
 
 import (
+	"net"
+
 	"github.com/facebook/time/ntp/chrony"
 	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
@@ -24,10 +26,53 @@ const (
 )
 
 var (
+	// The remote IP 127.127.1.1 means it is a "local" reference clock.
+	trackingLocalIP = net.IPv4(127, 127, 1, 1)
+
 	trackingLastOffset = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, trackingSubsystem, "last_offset_seconds"),
 			"Chrony tracking last offset in seconds",
+			nil,
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	trackingRefTime = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, trackingSubsystem, "reference_timestamp_seconds"),
+			"Chrony tracking Refreence timestamp",
+			nil,
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	trackingRemoteTracking = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, trackingSubsystem, "remote_reference"),
+			"Chrony tracking is connected to a remote source",
+			nil,
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	trackingRMSOffset = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, trackingSubsystem, "rms_offset_seconds"),
+			"Chrony tracking long-term average of the offset",
+			nil,
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	trackingStratum = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, trackingSubsystem, "stratum"),
+			"Chrony tracking client stratum",
 			nil,
 			nil,
 		),
@@ -50,5 +95,21 @@ func (e Exporter) getTrackingMetrics(ch chan<- prometheus.Metric, client chrony.
 	}
 
 	ch <- trackingLastOffset.mustNewConstMetric(tracking.LastOffset)
-	level.Debug(e.logger).Log("msg", "Last Offset", "offset", tracking.LastOffset)
+	level.Debug(e.logger).Log("msg", "Tracking Last Offset", "offset", tracking.LastOffset)
+
+	ch <- trackingRefTime.mustNewConstMetric(float64(tracking.RefTime.UnixNano()) / 1e9)
+	level.Debug(e.logger).Log("msg", "Tracking Ref Time", "ref_time", tracking.RefTime)
+
+	remoteTracking := 1.0
+	if tracking.IPAddr.Equal(trackingLocalIP) {
+		remoteTracking = 0.0
+	}
+	ch <- trackingRemoteTracking.mustNewConstMetric(remoteTracking)
+	level.Debug(e.logger).Log("msg", "Tracking is remote", "bool_value", remoteTracking)
+
+	ch <- trackingRMSOffset.mustNewConstMetric(tracking.RMSOffset)
+	level.Debug(e.logger).Log("msg", "Tracking RMS Offset", "rms_offset", tracking.RMSOffset)
+
+	ch <- trackingStratum.mustNewConstMetric(float64(tracking.Stratum))
+	level.Debug(e.logger).Log("msg", "Tracking Stratum", "stratum", tracking.Stratum)
 }
