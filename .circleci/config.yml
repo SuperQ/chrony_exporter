@@ -35,7 +35,7 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - prometheus/publish_master:
+      - prometheus/publish_main:
           context: publish
           docker_hub_organization: superque
           quay_io_organization: superq
@@ -44,7 +44,7 @@ workflows:
             - build
           filters:
             branches:
-              only: master
+              only: main
       - prometheus/publish_release:
           context: publish
           docker_hub_organization: superque
