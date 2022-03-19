@@ -1,0 +1,21 @@
+go:
+  # Whenever the Go version is updated here,
+  # .circleci/config.yml should also be updated.
+  version: 1.17
+
+repository:
+  path: github.com/superq/chrony_exporter
+build:
+  flags: -a -tags 'netgo static_build'
+  ldflags: |
+    -X github.com/prometheus/common/version.Version={{.Version}}
+    -X github.com/prometheus/common/version.Revision={{.Revision}}
+    -X github.com/prometheus/common/version.Branch={{.Branch}}
+    -X github.com/prometheus/common/version.BuildUser={{user}}@{{host}}
+    -X github.com/prometheus/common/version.BuildDate={{date "20060102-15:04:05"}}
+tarball:
+  files:
+    - LICENSE
+crossbuild:
+  platforms:
+    - linux
