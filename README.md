@@ -1,6 +1,6 @@
 # Prometheus Chrony Exporter
 
-[![Build Status](https://circleci.com/gh/superq/chrony_exporter.svg?style=svg)](https://circleci.com/gh/superq/chrony_exporter)
+[![Build Status](https://circleci.com/gh/SuperQ/chrony_exporter/tree/main.svg?style=svg)](https://circleci.com/gh/SuperQ/chrony_exporter/tree/main)
 
 This is a [Prometheus Exporter](https://prometheus.io) for [Chrony NTP](https://chrony.tuxfamily.org/).
 
