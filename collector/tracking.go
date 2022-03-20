@@ -29,6 +29,16 @@ var (
 	// The remote IP 127.127.1.1 means it is a "local" reference clock.
 	trackingLocalIP = net.IPv4(127, 127, 1, 1)
 
+	trackingInfo = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, trackingSubsystem, "info"),
+			"Chrony tracking info",
+			[]string{"tracking_refid", "tracking_address"},
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
 	trackingLastOffset = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, trackingSubsystem, "last_offset_seconds"),
@@ -93,6 +103,8 @@ func (e Exporter) getTrackingMetrics(ch chan<- prometheus.Metric, client chrony.
 		level.Error(e.logger).Log("msg", "Got wrong 'tracking' response", "packet", packet)
 		return
 	}
+
+	ch <- trackingInfo.mustNewConstMetric(1.0, chrony.RefidToString(tracking.RefID), tracking.IPAddr.String())
 
 	ch <- trackingLastOffset.mustNewConstMetric(tracking.LastOffset)
 	level.Debug(e.logger).Log("msg", "Tracking Last Offset", "offset", tracking.LastOffset)

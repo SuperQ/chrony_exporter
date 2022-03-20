@@ -14,6 +14,7 @@
 package collector
 
 import (
+	"encoding/binary"
 	"fmt"
 	"math"
 	"net"
@@ -126,6 +127,10 @@ func (e Exporter) getSourcesMetrics(ch chan<- prometheus.Metric, client chrony.C
 		// Ignore reverse lookup errors.
 		sourceNames, _ := net.LookupAddr(sourceAddress)
 		sourceName := strings.Join(sourceNames, ",")
+
+		if r.Mode == chrony.SourceModeRef && r.IPAddr.To4() != nil {
+			sourceName = chrony.RefidToString(binary.BigEndian.Uint32(r.IPAddr))
+		}
 
 		ch <- sourcesLastRx.mustNewConstMetric(float64(r.SinceSample), sourceAddress, sourceName)
 		ch <- sourcesLastSample.mustNewConstMetric(r.LatestMeas, sourceAddress, sourceName)
