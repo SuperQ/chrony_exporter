@@ -51,16 +51,19 @@ func main() {
 	flag.AddFlags(kingpin.CommandLine, promlogConfig)
 	kingpin.CommandLine.UsageWriter(os.Stdout)
 	kingpin.HelpFlag.Short('h')
-	kingpin.Version(version.Print("ipmi_exporter"))
+	kingpin.Version(version.Print("chrony_exporter"))
 	kingpin.Parse()
 
 	logger = promlog.New(promlogConfig)
+	level.Info(logger).Log("msg", "Starting chrony_exporter", "version", version.Info())
+	prometheus.MustRegister(version.NewCollector("chrony_exporter"))
 
 	exporter := collector.NewExporter(*address, logger)
 	prometheus.MustRegister(exporter)
 
 	http.Handle("/metrics", promhttp.Handler())
 
+	level.Info(logger).Log("msg", "Listening on", "address", *listenAddress)
 	srv := &http.Server{Addr: *listenAddress}
 	if err := web.ListenAndServe(srv, *webConfig, logger); err != nil {
 		level.Error(logger).Log("msg", "HTTP listener stopped", "error", err)

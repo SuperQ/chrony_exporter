@@ -21,10 +21,16 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 const (
 	namespace = "chrony"
+)
+
+var (
+	collectTracking = kingpin.Flag("collector.tracking", "Collect tracking metrics").Default("true").Bool()
+	collectSources  = kingpin.Flag("collector.sources", "Collect sources metrics").Default("false").Bool()
 )
 
 // Exporter collects chrony stats from the given server and exports
@@ -32,6 +38,9 @@ const (
 type Exporter struct {
 	address string
 	timeout time.Duration
+
+	collectSources  bool
+	collectTracking bool
 
 	logger log.Logger
 }
@@ -46,10 +55,15 @@ func (d *typedDesc) mustNewConstMetric(value float64, labels ...string) promethe
 }
 
 func NewExporter(address string, logger log.Logger) Exporter {
+
 	return Exporter{
 		address: address,
 		timeout: 5 * time.Second,
-		logger:  logger,
+
+		collectSources:  *collectSources,
+		collectTracking: *collectTracking,
+
+		logger: logger,
 	}
 }
 
@@ -67,5 +81,11 @@ func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 
 	client := chrony.Client{Sequence: 1, Connection: conn}
 
-	e.getTrackingMetrics(ch, client)
+	if e.collectSources {
+		e.getSourcesMetrics(ch, client)
+	}
+
+	if e.collectTracking {
+		e.getTrackingMetrics(ch, client)
+	}
 }
