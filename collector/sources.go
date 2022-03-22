@@ -15,7 +15,6 @@ package collector
 
 import (
 	"encoding/binary"
-	"fmt"
 	"math"
 	"net"
 	"strings"
@@ -136,20 +135,7 @@ func (e Exporter) getSourcesMetrics(ch chan<- prometheus.Metric, client chrony.C
 		ch <- sourcesLastSample.mustNewConstMetric(r.LatestMeas, sourceAddress, sourceName)
 		ch <- sourcesLastSampleErr.mustNewConstMetric(r.LatestMeasErr, sourceAddress, sourceName)
 		ch <- sourcesPollInterval.mustNewConstMetric(math.Pow(2, float64(r.Poll)), sourceAddress, sourceName)
-		ch <- sourcesStateInfo.mustNewConstMetric(1.0, sourceAddress, sourceName, r.State.String(), modeTypeString(r.Mode))
+		ch <- sourcesStateInfo.mustNewConstMetric(1.0, sourceAddress, sourceName, r.State.String(), r.Mode.String())
 		ch <- sourcesStratum.mustNewConstMetric(float64(r.Stratum), sourceAddress, sourceName)
 	}
-}
-
-var modeTypeDesc = []string{
-	"client",
-	"peer",
-	"ref",
-}
-
-func modeTypeString(m chrony.ModeType) string {
-	if int(m) >= len(modeTypeDesc) {
-		return fmt.Sprintf("unknown (%d)", m)
-	}
-	return modeTypeDesc[m]
 }

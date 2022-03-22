@@ -84,8 +84,8 @@ github.com/envoyproxy/go-control-plane v0.9.7/go.mod h1:cwu0lG7PUMfa9snN8LXBig5y
 github.com/envoyproxy/go-control-plane v0.9.9-0.20201210154907-fd9021fe5dad/go.mod h1:cXg6YxExXjJnVBQHBLXeUAgxn2UodCpnH306RInaBQk=
 github.com/envoyproxy/go-control-plane v0.9.9-0.20210217033140-668b12f5399d/go.mod h1:cXg6YxExXjJnVBQHBLXeUAgxn2UodCpnH306RInaBQk=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
-github.com/facebook/time v0.0.0-20220316161424-3a8d215e68d1 h1:8amfjUze0Fhar+nqHDtb9saWZuozxEbwomI+i72TFVM=
-github.com/facebook/time v0.0.0-20220316161424-3a8d215e68d1/go.mod h1:lLT1wMv6BsKGosCysePqnmIMtB4mUeoqdtu3+MhMODI=
+github.com/facebook/time v0.0.0-20220322174213-ce2ba1883c2c h1:CNSI/RPrxCRMIUpC637gMWlMxaGAYbw56/LLkw70AeM=
+github.com/facebook/time v0.0.0-20220322174213-ce2ba1883c2c/go.mod h1:lLT1wMv6BsKGosCysePqnmIMtB4mUeoqdtu3+MhMODI=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/fatih/color v1.13.0/go.mod h1:kLAiJbzzSOZDVNGyDpeOxJ47H46qBXwg5ILebYFFOfk=
 github.com/frankban/quicktest v1.11.3/go.mod h1:wRf/ReqHper53s+kmmSZizM8NamnL3IM0I9ntUbOk+k=
