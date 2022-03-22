@@ -3,7 +3,7 @@ module github.com/superq/chrony_exporter
 go 1.17
 
 require (
-	github.com/facebook/time v0.0.0-20220316161424-3a8d215e68d1
+	github.com/facebook/time v0.0.0-20220322174213-ce2ba1883c2c
 	github.com/go-kit/log v0.2.0
 	github.com/prometheus/client_golang v1.12.1
 	github.com/prometheus/common v0.32.1
