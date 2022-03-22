@@ -46,7 +46,7 @@ By default, the exporter will bind on `:9123`.
 
 ## TLS and basic authentication
 
-The IPMI Exporter supports TLS and basic authentication.
+The Chrony Exporter supports TLS and basic authentication.
 
 To use TLS and/or basic authentication, you need to pass a configuration file
 using the `--web.config.file` parameter. The format of the file is described
