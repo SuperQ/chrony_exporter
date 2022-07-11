@@ -96,10 +96,10 @@ func chronyFormatName(tracking chrony.Tracking) string {
 		return chrony.RefidToString(tracking.RefID)
 	} else {
 		names, err := net.LookupAddr(tracking.IPAddr.String())
-		if err != nil {
+		if err != nil || len(names) < 1 {
 			return tracking.IPAddr.String()
 		}
-		return strings.Join(names, ",")
+		return strings.TrimRight(names[0], ".")
 	}
 }
 
