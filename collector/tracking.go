@@ -15,6 +15,7 @@ package collector
 
 import (
 	"net"
+	"strings"
 
 	"github.com/facebook/time/ntp/chrony"
 	"github.com/go-kit/log/level"
@@ -33,7 +34,7 @@ var (
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, trackingSubsystem, "info"),
 			"Chrony tracking info",
-			[]string{"tracking_refid", "tracking_address"},
+			[]string{"tracking_address", "tracking_name", "tracking_refid"},
 			nil,
 		),
 		prometheus.GaugeValue,
@@ -90,6 +91,18 @@ var (
 	}
 )
 
+func chronyFormatName(tracking chrony.Tracking) string {
+	if tracking.IPAddr.IsUnspecified() {
+		return chrony.RefidToString(tracking.RefID)
+	} else {
+		names, err := net.LookupAddr(tracking.IPAddr.String())
+		if err != nil {
+			return tracking.IPAddr.String()
+		}
+		return strings.Join(names, ",")
+	}
+}
+
 func (e Exporter) getTrackingMetrics(ch chan<- prometheus.Metric, client chrony.Client) {
 	packet, err := client.Communicate(chrony.NewTrackingPacket())
 	if err != nil {
@@ -104,7 +117,7 @@ func (e Exporter) getTrackingMetrics(ch chan<- prometheus.Metric, client chrony.
 		return
 	}
 
-	ch <- trackingInfo.mustNewConstMetric(1.0, chrony.RefidToString(tracking.RefID), tracking.IPAddr.String())
+	ch <- trackingInfo.mustNewConstMetric(1.0, tracking.IPAddr.String(), chronyFormatName(tracking.Tracking), chrony.RefidAsHEX(tracking.RefID))
 
 	ch <- trackingLastOffset.mustNewConstMetric(tracking.LastOffset)
 	level.Debug(e.logger).Log("msg", "Tracking Last Offset", "offset", tracking.LastOffset)
