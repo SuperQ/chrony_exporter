@@ -6,7 +6,7 @@ require (
 	github.com/facebook/time v0.0.0-20220708172321-77a8e2e9790d
 	github.com/go-kit/log v0.2.1
 	github.com/prometheus/client_golang v1.12.2
-	github.com/prometheus/common v0.36.0
+	github.com/prometheus/common v0.37.0
 	github.com/prometheus/exporter-toolkit v0.7.1
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )
