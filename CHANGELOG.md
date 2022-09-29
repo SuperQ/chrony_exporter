@@ -1,5 +1,10 @@
 ## main / unreleased
 
+## 0.3.1 / 2022-09-29
+
+* [CHANGE] Update build to Go 1.19. #13
+* [ChANGE] Update dependencies. #13
+
 ## 0.3.0 / 2022-07-11
 
 * [CHANGE] Fix tracking info metric #8
