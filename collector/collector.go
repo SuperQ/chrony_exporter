@@ -31,6 +31,16 @@ const (
 var (
 	collectTracking = kingpin.Flag("collector.tracking", "Collect tracking metrics").Default("true").Bool()
 	collectSources  = kingpin.Flag("collector.sources", "Collect sources metrics").Default("false").Bool()
+
+	upMetric = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "", "up"),
+			"Whether the chrony server is up.",
+			nil,
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
 )
 
 // Exporter collects chrony stats from the given server and exports
@@ -73,19 +83,33 @@ func (e Exporter) Describe(ch chan<- *prometheus.Desc) {
 
 // Collect implements prometheus.Collector.
 func (e Exporter) Collect(ch chan<- prometheus.Metric) {
+	var up float64
+	defer func() {
+		ch <- upMetric.mustNewConstMetric(up)
+	}()
 	conn, err := net.DialTimeout("udp", e.address, e.timeout)
 	if err != nil {
-		level.Info(e.logger).Log("msg", "Couldn't dial UDP", "address", e.address)
+		level.Debug(e.logger).Log("msg", "Couldn't dial UDP", "address", e.address)
 		return
 	}
+
+	up = 1
 
 	client := chrony.Client{Sequence: 1, Connection: conn}
 
 	if e.collectSources {
-		e.getSourcesMetrics(ch, client)
+		err = e.getSourcesMetrics(ch, client)
+		if err != nil {
+			level.Debug(e.logger).Log("msg", "Couldn't get sources", "err", err)
+			up = 0
+		}
 	}
 
 	if e.collectTracking {
-		e.getTrackingMetrics(ch, client)
+		err = e.getTrackingMetrics(ch, client)
+		if err != nil {
+			level.Debug(e.logger).Log("msg", "Couldn't get tracking", "err", err)
+			up = 0
+		}
 	}
 }
