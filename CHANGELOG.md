@@ -1,5 +1,9 @@
 ## main / unreleased
 
+## 0.4.0 / 2022-10-06
+
+* [FEATURE] Add `chrony_up` metric #14
+
 ## 0.3.1 / 2022-09-29
 
 * [CHANGE] Update build to Go 1.19. #13
