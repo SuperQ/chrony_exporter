@@ -15,6 +15,7 @@ package collector
 
 import (
 	"encoding/binary"
+	"fmt"
 	"math"
 	"net"
 	"strings"
@@ -90,18 +91,16 @@ var (
 	}
 )
 
-func (e Exporter) getSourcesMetrics(ch chan<- prometheus.Metric, client chrony.Client) {
+func (e Exporter) getSourcesMetrics(ch chan<- prometheus.Metric, client chrony.Client) error {
 	packet, err := client.Communicate(chrony.NewSourcesPacket())
 	if err != nil {
-		level.Error(e.logger).Log("msg", "Couldn't get sources", "err", err)
-		return
+		return err
 	}
 	level.Debug(e.logger).Log("msg", "Got 'sources' response", "sources_packet", packet.GetStatus())
 
 	sources, ok := packet.(*chrony.ReplySources)
 	if !ok {
-		level.Error(e.logger).Log("msg", "Got wrong 'sources' response", "packet", packet)
-		return
+		return fmt.Errorf("Got wrong 'sources' response: %q", packet)
 	}
 
 	results := make([]chrony.ReplySourceData, sources.NSources)
@@ -110,13 +109,11 @@ func (e Exporter) getSourcesMetrics(ch chan<- prometheus.Metric, client chrony.C
 		level.Debug(e.logger).Log("msg", "Fetching source", "source", i)
 		packet, err = client.Communicate(chrony.NewSourceDataPacket(int32(i)))
 		if err != nil {
-			level.Error(e.logger).Log("msg", "Failed to get sourcedata response", "source", i)
-			return
+			return fmt.Errorf("Failed to get sourcedata response: %d", i)
 		}
 		sourceData, ok := packet.(*chrony.ReplySourceData)
 		if !ok {
-			level.Error(e.logger).Log("msg", "Got wrong 'sourcedata' response", "packet", packet)
-			return
+			return fmt.Errorf("Got wrong 'sourcedata' response: %q", packet)
 		}
 		results[i] = *sourceData
 	}
@@ -138,4 +135,6 @@ func (e Exporter) getSourcesMetrics(ch chan<- prometheus.Metric, client chrony.C
 		ch <- sourcesStateInfo.mustNewConstMetric(1.0, sourceAddress, sourceName, r.State.String(), r.Mode.String())
 		ch <- sourcesStratum.mustNewConstMetric(float64(r.Stratum), sourceAddress, sourceName)
 	}
+
+	return nil
 }

@@ -14,6 +14,7 @@
 package collector
 
 import (
+	"fmt"
 	"net"
 	"strings"
 
@@ -103,18 +104,16 @@ func chronyFormatName(tracking chrony.Tracking) string {
 	}
 }
 
-func (e Exporter) getTrackingMetrics(ch chan<- prometheus.Metric, client chrony.Client) {
+func (e Exporter) getTrackingMetrics(ch chan<- prometheus.Metric, client chrony.Client) error {
 	packet, err := client.Communicate(chrony.NewTrackingPacket())
 	if err != nil {
-		level.Error(e.logger).Log("msg", "Couldn't get tracking", "err", err)
-		return
+		return err
 	}
 	level.Debug(e.logger).Log("msg", "Got 'tracking' response", "tracking_packet", packet.GetStatus())
 
 	tracking, ok := packet.(*chrony.ReplyTracking)
 	if !ok {
-		level.Error(e.logger).Log("msg", "Got wrong 'tracking' response", "packet", packet)
-		return
+		return fmt.Errorf("Got wrong 'tracking' response: %q", packet)
 	}
 
 	ch <- trackingInfo.mustNewConstMetric(1.0, tracking.IPAddr.String(), chronyFormatName(tracking.Tracking), chrony.RefidAsHEX(tracking.RefID))
@@ -137,4 +136,6 @@ func (e Exporter) getTrackingMetrics(ch chan<- prometheus.Metric, client chrony.
 
 	ch <- trackingStratum.mustNewConstMetric(float64(tracking.Stratum))
 	level.Debug(e.logger).Log("msg", "Tracking Stratum", "stratum", tracking.Stratum)
+
+	return nil
 }
