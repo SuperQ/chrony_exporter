@@ -54,7 +54,7 @@ var (
 	trackingRefTime = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, trackingSubsystem, "reference_timestamp_seconds"),
-			"Chrony tracking Refreence timestamp",
+			"Chrony tracking Reference timestamp",
 			nil,
 			nil,
 		),
