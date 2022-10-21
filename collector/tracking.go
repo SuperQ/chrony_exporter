@@ -54,7 +54,17 @@ var (
 	trackingRefTime = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, trackingSubsystem, "reference_timestamp_seconds"),
-			"Chrony tracking Refreence timestamp",
+			"Chrony tracking Reference timestamp",
+			nil,
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	trackingSystemTime = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, trackingSubsystem, "system_time_seconds"),
+			"Chrony tracking System time",
 			nil,
 			nil,
 		),
@@ -123,6 +133,9 @@ func (e Exporter) getTrackingMetrics(ch chan<- prometheus.Metric, client chrony.
 
 	ch <- trackingRefTime.mustNewConstMetric(float64(tracking.RefTime.UnixNano()) / 1e9)
 	level.Debug(e.logger).Log("msg", "Tracking Ref Time", "ref_time", tracking.RefTime)
+
+	ch <- trackingSystemTime.mustNewConstMetric(float64(tracking.CurrentCorrection))
+	level.Debug(e.logger).Log("msg", "Tracking System Time", "system_time", tracking.CurrentCorrection)
 
 	remoteTracking := 1.0
 	if tracking.IPAddr.Equal(trackingLocalIP) {
