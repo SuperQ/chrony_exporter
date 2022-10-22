@@ -44,6 +44,25 @@ To disable a collector, use `--no-`. (i.e. `--no-collector.tracking`)
 
 By default, the exporter will bind on `:9123`.
 
+## Prometheus Rules
+
+You can use [Prometheus rules](https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/) to pre-compute some values.
+
+For example, the maximum clock error can be computed from several metrics as [documented in the Chrony man pages](https://chrony.tuxfamily.org/doc/4.3/chronyc.html).
+
+```yaml
+groups:
+  - name: Chrony
+    rules:
+      - record: instance:chrony_clock_error_seconds:abs
+        expr: >
+          abs(chrony_tracking_last_offset_seconds)
+          +
+          chrony_tracking_root_dispersion_seconds
+          +
+          (0.5 * chrony_tracking_root_delay_seconds)
+```
+
 ## TLS and basic authentication
 
 The Chrony Exporter supports TLS and basic authentication.
