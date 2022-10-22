@@ -1,5 +1,11 @@
 ## main / unreleased
 
+## 0.5.0 / 2022-10-22
+
+* [FEATURE] Add System time (aka "current correction") metric #16
+* [FEATURE] Add Root delay/dispersion metrics #17
+* [FEATURE] Add multiple listeners and systemd socket listener #18
+
 ## 0.4.0 / 2022-10-06
 
 * [FEATURE] Add `chrony_up` metric #14
