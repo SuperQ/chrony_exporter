@@ -27,21 +27,17 @@ import (
 	"github.com/prometheus/common/promlog/flag"
 	"github.com/prometheus/common/version"
 	"github.com/prometheus/exporter-toolkit/web"
-	webflag "github.com/prometheus/exporter-toolkit/web/kingpinflag"
+	"github.com/prometheus/exporter-toolkit/web/kingpinflag"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
-	listenAddress = kingpin.Flag(
-		"web.listen-address",
-		"Address to listen on for web interface and telemetry.",
-	).Default(":9123").String()
 	address = kingpin.Flag(
 		"chrony.address",
 		"Address of the Chrony srever.",
 	).Default("[::1]:323").String()
 
-	webConfig = webflag.AddFlags(kingpin.CommandLine)
+	toolkitFlags = kingpinflag.AddFlags(kingpin.CommandLine, ":9123")
 
 	logger log.Logger
 )
@@ -63,9 +59,8 @@ func main() {
 
 	http.Handle("/metrics", promhttp.Handler())
 
-	level.Info(logger).Log("msg", "Listening on", "address", *listenAddress)
-	srv := &http.Server{Addr: *listenAddress}
-	if err := web.ListenAndServe(srv, *webConfig, logger); err != nil {
+	server := &http.Server{}
+	if err := web.ListenAndServe(server, toolkitFlags, logger); err != nil {
 		level.Error(logger).Log("msg", "HTTP listener stopped", "error", err)
 		os.Exit(1)
 	}
