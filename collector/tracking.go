@@ -94,7 +94,7 @@ var (
 	trackingRootDelay = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, trackingSubsystem, "root_delay_seconds"),
-			"Chrony tracking total of all network path delays to the NTP root",
+			"This is the total of the network path delays to the stratum-1 computer from which the computer is ultimately synchronised",
 			nil,
 			nil,
 		),
