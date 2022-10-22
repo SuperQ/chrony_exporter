@@ -91,6 +91,16 @@ var (
 		prometheus.GaugeValue,
 	}
 
+	trackingRootDelay = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, trackingSubsystem, "root_delay_seconds"),
+			"Chrony tracking total of all network path delays to the NTP root",
+			nil,
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
 	trackingStratum = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, trackingSubsystem, "stratum"),
@@ -146,6 +156,9 @@ func (e Exporter) getTrackingMetrics(ch chan<- prometheus.Metric, client chrony.
 
 	ch <- trackingRMSOffset.mustNewConstMetric(tracking.RMSOffset)
 	level.Debug(e.logger).Log("msg", "Tracking RMS Offset", "rms_offset", tracking.RMSOffset)
+
+	ch <- trackingRootDelay.mustNewConstMetric(tracking.RootDelay)
+	level.Debug(e.logger).Log("msg", "Tracking Root delay", "root_delay", tracking.RootDelay)
 
 	ch <- trackingStratum.mustNewConstMetric(float64(tracking.Stratum))
 	level.Debug(e.logger).Log("msg", "Tracking Stratum", "stratum", tracking.Stratum)
