@@ -101,6 +101,16 @@ var (
 		prometheus.GaugeValue,
 	}
 
+	trackingRootDispersion = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, trackingSubsystem, "root_dispersion_seconds"),
+			"Chrony tracking total of all measurement errors to the NTP root",
+			nil,
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
 	trackingStratum = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, trackingSubsystem, "stratum"),
@@ -159,6 +169,9 @@ func (e Exporter) getTrackingMetrics(ch chan<- prometheus.Metric, client chrony.
 
 	ch <- trackingRootDelay.mustNewConstMetric(tracking.RootDelay)
 	level.Debug(e.logger).Log("msg", "Tracking Root delay", "root_delay", tracking.RootDelay)
+
+	ch <- trackingRootDispersion.mustNewConstMetric(tracking.RootDispersion)
+	level.Debug(e.logger).Log("msg", "Tracking Root dispersion", "root_dispersion", tracking.RootDispersion)
 
 	ch <- trackingStratum.mustNewConstMetric(float64(tracking.Stratum))
 	level.Debug(e.logger).Log("msg", "Tracking Stratum", "stratum", tracking.Stratum)
