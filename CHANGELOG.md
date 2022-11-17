@@ -1,5 +1,9 @@
 ## main / unreleased
 
+## 0.5.1 / 2022-11-17
+
+* [CHANGE] Add armv7 container build #20
+
 ## 0.5.0 / 2022-10-22
 
 * [FEATURE] Add System time (aka "current correction") metric #16
@@ -13,7 +17,7 @@
 ## 0.3.1 / 2022-09-29
 
 * [CHANGE] Update build to Go 1.19. #13
-* [ChANGE] Update dependencies. #13
+* [CHANGE] Update dependencies. #13
 
 ## 0.3.0 / 2022-07-11
 
