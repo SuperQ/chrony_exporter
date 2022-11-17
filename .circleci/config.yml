@@ -31,7 +31,6 @@ workflows:
       - prometheus/build:
           name: build
           parallelism: 3
-          promu_opts: "-p linux/amd64 -p windows/amd64 -p linux/arm64 -p darwin/amd64 -p darwin/arm64 -p linux/386"
           filters:
             tags:
               only: /.*/
