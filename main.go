@@ -19,6 +19,7 @@ import (
 
 	"github.com/superq/chrony_exporter/collector"
 
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
@@ -28,7 +29,6 @@ import (
 	"github.com/prometheus/common/version"
 	"github.com/prometheus/exporter-toolkit/web"
 	"github.com/prometheus/exporter-toolkit/web/kingpinflag"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
@@ -43,6 +43,10 @@ var (
 )
 
 func main() {
+	metricsPath := kingpin.Flag(
+		"web.telemetry-path",
+		"Path under which to expose metrics.",
+	).Default("/metrics").String()
 	promlogConfig := &promlog.Config{}
 	flag.AddFlags(kingpin.CommandLine, promlogConfig)
 	kingpin.CommandLine.UsageWriter(os.Stdout)
@@ -57,7 +61,30 @@ func main() {
 	exporter := collector.NewExporter(*address, logger)
 	prometheus.MustRegister(exporter)
 
-	http.Handle("/metrics", promhttp.Handler())
+	http.Handle(*metricsPath, promhttp.Handler())
+	if *metricsPath != "/" && *metricsPath != "" {
+		landingConfig := web.LandingConfig{
+			Name:        "Chrony Exporter",
+			Description: "Prometheus Exporter for Chrony NTP",
+			Version:     version.Info(),
+			Links: []web.LandingLinks{
+				{
+					Address: *metricsPath,
+					Text:    "Metrics",
+				},
+				{
+					Address: "https://chrony.tuxfamily.org/",
+					Text:    "Chrony NTP",
+				},
+			},
+		}
+		landingPage, err := web.NewLandingPage(landingConfig)
+		if err != nil {
+			level.Error(logger).Log("err", err)
+			os.Exit(1)
+		}
+		http.Handle("/", landingPage)
+	}
 
 	server := &http.Server{}
 	if err := web.ListenAndServe(server, toolkitFlags, logger); err != nil {
