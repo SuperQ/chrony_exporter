@@ -1,6 +1,7 @@
 # Prometheus Chrony Exporter
 
 [![Build Status](https://circleci.com/gh/SuperQ/chrony_exporter/tree/main.svg?style=svg)](https://circleci.com/gh/SuperQ/chrony_exporter/tree/main)
+[![Docker Repository on Quay](https://quay.io/repository/superq/chrony-exporter/status "Docker Repository on Quay")](https://quay.io/repository/superq/chrony-exporter)
 
 This is a [Prometheus Exporter](https://prometheus.io) for [Chrony NTP](https://chrony.tuxfamily.org/).
 
@@ -27,6 +28,17 @@ You can build a Docker container with the included `docker` make target:
     make docker
 
 This will not even require Go tooling on the host.
+
+### Running in a container
+
+Because chrony only listens on the host localhost, you need to adjust the default chrony address
+
+    docker run \
+      -d --rm \
+      --name chrony-exporter \
+      -p 9123:9123 \
+      quay.io/superq/chorny-exporter \
+      --chrony-address=host.docker.internal:323
 
 ## Running
 
