@@ -1,0 +1,13 @@
+---
+version: '3'
+services:
+  chrony-exporter:
+    image: quay.io/superq/chrony-exporter:latest
+    pull_policy: always
+    container_name: chrony_exporter
+    command:
+      - '--chrony-address=host.docker.internal:323'
+      - '--collector.sources'
+    ports:
+      - '9123:9123'
+    restart: unless-stopped
