@@ -48,7 +48,7 @@ A minimal invocation looks like this:
 
 Supported parameters include:
 
-- `--web.listen-address`: the address/port to listen on (default: `":9290"`)
+- `--web.listen-address`: the address/port to listen on (default: `":9123"`)
 - `--collector.sources`: Enable/disable the collection of `chronyc sources` metrics. (Default: Disabled)
 - `--collector.tracking`: Enable/disable the collection of `chronyc tracking` metrics. (Default: Enabled)
 
