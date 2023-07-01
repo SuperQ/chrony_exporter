@@ -125,13 +125,12 @@ var (
 func chronyFormatName(tracking chrony.Tracking) string {
 	if tracking.IPAddr.IsUnspecified() {
 		return chrony.RefidToString(tracking.RefID)
-	} else {
-		names, err := net.LookupAddr(tracking.IPAddr.String())
-		if err != nil || len(names) < 1 {
-			return tracking.IPAddr.String()
-		}
-		return strings.TrimRight(names[0], ".")
 	}
+	names, err := net.LookupAddr(tracking.IPAddr.String())
+	if err != nil || len(names) < 1 {
+		return tracking.IPAddr.String()
+	}
+	return strings.TrimRight(names[0], ".")
 }
 
 func (e Exporter) getTrackingMetrics(ch chan<- prometheus.Metric, client chrony.Client) error {
