@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"math"
 	"net"
+	"sort"
 	"strings"
 
 	"github.com/facebook/time/ntp/chrony"
@@ -122,6 +123,7 @@ func (e Exporter) getSourcesMetrics(ch chan<- prometheus.Metric, client chrony.C
 		sourceAddress := r.IPAddr.String()
 		// Ignore reverse lookup errors.
 		sourceNames, _ := net.LookupAddr(sourceAddress)
+		sort.Strings(sourceNames)
 		sourceName := strings.Join(sourceNames, ",")
 
 		if r.Mode == chrony.SourceModeRef && r.IPAddr.To4() != nil {
