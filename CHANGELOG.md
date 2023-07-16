@@ -1,5 +1,10 @@
 ## main / unreleased
 
+## 0.6.0 / 2023-07-16
+
+* [FEATURE] Add support for connecting to chrony using unix datagram sockets. #35
+* [BUGFIX] Sort source names #39
+
 ## 0.5.1 / 2022-11-17
 
 * [CHANGE] Add armv7 container build #20
