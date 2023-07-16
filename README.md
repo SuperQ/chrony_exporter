@@ -49,12 +49,17 @@ A minimal invocation looks like this:
 Supported parameters include:
 
 - `--web.listen-address`: the address/port to listen on (default: `":9123"`)
+- `--chrony.address`: the address/port (UDP) or path to Unix socket used to connect to chrony (default: `"[::1]:323"`)
 - `--collector.sources`: Enable/disable the collection of `chronyc sources` metrics. (Default: Disabled)
 - `--collector.tracking`: Enable/disable the collection of `chronyc tracking` metrics. (Default: Enabled)
 
 To disable a collector, use `--no-`. (i.e. `--no-collector.tracking`)
 
 By default, the exporter will bind on `:9123`.
+
+In case chrony is configured to not accept command messages via UDP (`cmdport 0`) the exporter can use the unix command socket opened by chrony.
+In this case use the command line option `--chrony.address=unix:///path/to/chronyd.sock` to configure the path to the chrony command socket.
+On most systems chrony will be listenting on `unix:///run/chrony/chronyd.sock`. For this to work the exporter needs to run as root or the same user as chrony.
 
 ## Prometheus Rules
 

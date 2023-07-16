@@ -14,7 +14,11 @@
 package collector
 
 import (
+	"fmt"
 	"net"
+	"os"
+	"path"
+	"strings"
 	"time"
 
 	"github.com/alecthomas/kingpin/v2"
@@ -81,15 +85,39 @@ func NewExporter(address string, logger log.Logger) Exporter {
 func (e Exporter) Describe(ch chan<- *prometheus.Desc) {
 }
 
+func (e Exporter) dial() (net.Conn, error, func()) {
+	if strings.HasPrefix(e.address, "unix://") {
+		remote := strings.TrimPrefix(e.address, "unix://")
+		base, _ := path.Split(remote)
+		local := path.Join(base, fmt.Sprintf("chrony_exporter.%d.sock", os.Getpid()))
+		conn, err := net.DialUnix("unixgram",
+			&net.UnixAddr{Name: local, Net: "unixgram"},
+			&net.UnixAddr{Name: remote, Net: "unixgram"},
+		)
+		if err != nil {
+			return nil, err, func() { os.Remove(local) }
+		}
+		err = conn.SetReadDeadline(time.Now().Add(e.timeout))
+		if err != nil {
+			level.Debug(e.logger).Log("msg", "Couldn't set read-timeout for unix datagram socket", "err", err)
+		}
+		return conn, nil, func() { conn.Close(); os.Remove(local) }
+	}
+
+	conn, err := net.DialTimeout("udp", e.address, e.timeout)
+	return conn, err, func() {}
+}
+
 // Collect implements prometheus.Collector.
 func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 	var up float64
 	defer func() {
 		ch <- upMetric.mustNewConstMetric(up)
 	}()
-	conn, err := net.DialTimeout("udp", e.address, e.timeout)
+	conn, err, cleanup := e.dial()
+	defer cleanup()
 	if err != nil {
-		level.Debug(e.logger).Log("msg", "Couldn't dial UDP", "address", e.address)
+		level.Debug(e.logger).Log("msg", "Couldn't connect to chrony", "address", e.address, "err", err)
 		return
 	}
 
