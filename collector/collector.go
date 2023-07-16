@@ -33,8 +33,9 @@ const (
 )
 
 var (
-	collectTracking = kingpin.Flag("collector.tracking", "Collect tracking metrics").Default("true").Bool()
-	collectSources  = kingpin.Flag("collector.sources", "Collect sources metrics").Default("false").Bool()
+	collectTracking    = kingpin.Flag("collector.tracking", "Collect tracking metrics").Default("true").Bool()
+	collectSources     = kingpin.Flag("collector.sources", "Collect sources metrics").Default("false").Bool()
+	collectChmodSocket = kingpin.Flag("collector.chmod-socket", "Chmod 0666 the receiving unix datagram socket").Default("false").Bool()
 
 	upMetric = typedDesc{
 		prometheus.NewDesc(
@@ -53,8 +54,9 @@ type Exporter struct {
 	address string
 	timeout time.Duration
 
-	collectSources  bool
-	collectTracking bool
+	collectSources     bool
+	collectTracking    bool
+	collectChmodSocket bool
 
 	logger log.Logger
 }
@@ -74,8 +76,9 @@ func NewExporter(address string, logger log.Logger) Exporter {
 		address: address,
 		timeout: 5 * time.Second,
 
-		collectSources:  *collectSources,
-		collectTracking: *collectTracking,
+		collectSources:     *collectSources,
+		collectTracking:    *collectTracking,
+		collectChmodSocket: *collectChmodSocket,
 
 		logger: logger,
 	}
@@ -96,6 +99,11 @@ func (e Exporter) dial() (net.Conn, error, func()) {
 		)
 		if err != nil {
 			return nil, err, func() { os.Remove(local) }
+		}
+		if e.collectChmodSocket {
+			if err := os.Chmod(local, 0666); err != nil {
+				return nil, err, func() { conn.Close(); os.Remove(local) }
+			}
 		}
 		err = conn.SetReadDeadline(time.Now().Add(e.timeout))
 		if err != nil {

@@ -60,6 +60,7 @@ By default, the exporter will bind on `:9123`.
 In case chrony is configured to not accept command messages via UDP (`cmdport 0`) the exporter can use the unix command socket opened by chrony.
 In this case use the command line option `--chrony.address=unix:///path/to/chronyd.sock` to configure the path to the chrony command socket.
 On most systems chrony will be listenting on `unix:///run/chrony/chronyd.sock`. For this to work the exporter needs to run as root or the same user as chrony.
+When the exporter is run as root the flag `collector.chmod-socket` is needed as well.
 
 ## Prometheus Rules
 
