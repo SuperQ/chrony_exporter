@@ -37,8 +37,8 @@ Because chrony only listens on the host localhost, you need to adjust the defaul
       -d --rm \
       --name chrony-exporter \
       -p 9123:9123 \
-      quay.io/superq/chorny-exporter \
-      --chrony-address=host.docker.internal:323
+      quay.io/superq/chrony-exporter \
+      --chrony.address=host.docker.internal:323
 
 ## Running
 
