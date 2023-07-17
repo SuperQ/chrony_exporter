@@ -1,5 +1,9 @@
 ## main / unreleased
 
+## 0.6.1 / 2023-07-16
+
+* [ENHANCEMENT] Add a command line option to force chmod on the receiving unix socket. #45
+
 ## 0.6.0 / 2023-07-16
 
 * [FEATURE] Add support for connecting to chrony using unix datagram sockets. #35
