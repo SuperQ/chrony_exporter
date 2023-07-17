@@ -44,7 +44,7 @@ var (
 	sourcesLastSample = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, sourcesSubsystem, "last_sample_offset_seconds"),
-			"Chrony sources last sample margin of error in seconds",
+			"Chrony sources last sample offset in seconds",
 			[]string{"source_address", "source_name"},
 			nil,
 		),
@@ -54,7 +54,7 @@ var (
 	sourcesLastSampleErr = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, sourcesSubsystem, "last_sample_error_margin_seconds"),
-			"Chrony sources last sample offset in seconds",
+			"Chrony sources last sample margin of error in seconds",
 			[]string{"source_address", "source_name"},
 			nil,
 		),
