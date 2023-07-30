@@ -36,6 +36,7 @@ var (
 	collectTracking    = kingpin.Flag("collector.tracking", "Collect tracking metrics").Default("true").Bool()
 	collectSources     = kingpin.Flag("collector.sources", "Collect sources metrics").Default("false").Bool()
 	collectChmodSocket = kingpin.Flag("collector.chmod-socket", "Chmod 0666 the receiving unix datagram socket").Default("false").Bool()
+	collectDNSLookups  = kingpin.Flag("collector.dns-lookups", "do reverse DNS lookups").Default("true").Bool()
 
 	upMetric = typedDesc{
 		prometheus.NewDesc(
@@ -57,6 +58,7 @@ type Exporter struct {
 	collectSources     bool
 	collectTracking    bool
 	collectChmodSocket bool
+	collectDNSLookups  bool
 
 	logger log.Logger
 }
@@ -79,6 +81,7 @@ func NewExporter(address string, logger log.Logger) Exporter {
 		collectSources:     *collectSources,
 		collectTracking:    *collectTracking,
 		collectChmodSocket: *collectChmodSocket,
+		collectDNSLookups:  *collectDNSLookups,
 
 		logger: logger,
 	}

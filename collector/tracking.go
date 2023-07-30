@@ -122,10 +122,14 @@ var (
 	}
 )
 
-func chronyFormatName(tracking chrony.Tracking) string {
+func (e Exporter) chronyFormatName(tracking chrony.Tracking) string {
 	if tracking.IPAddr.IsUnspecified() {
 		return chrony.RefidToString(tracking.RefID)
 	}
+	if !e.collectDNSLookups {
+		return tracking.IPAddr.String()
+	}
+
 	names, err := net.LookupAddr(tracking.IPAddr.String())
 	if err != nil || len(names) < 1 {
 		return tracking.IPAddr.String()
@@ -145,7 +149,7 @@ func (e Exporter) getTrackingMetrics(ch chan<- prometheus.Metric, client chrony.
 		return fmt.Errorf("Got wrong 'tracking' response: %q", packet)
 	}
 
-	ch <- trackingInfo.mustNewConstMetric(1.0, tracking.IPAddr.String(), chronyFormatName(tracking.Tracking), chrony.RefidAsHEX(tracking.RefID))
+	ch <- trackingInfo.mustNewConstMetric(1.0, tracking.IPAddr.String(), e.chronyFormatName(tracking.Tracking), chrony.RefidAsHEX(tracking.RefID))
 
 	ch <- trackingLastOffset.mustNewConstMetric(tracking.LastOffset)
 	level.Debug(e.logger).Log("msg", "Tracking Last Offset", "offset", tracking.LastOffset)
