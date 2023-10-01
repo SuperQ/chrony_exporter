@@ -1,10 +1,10 @@
 module github.com/superq/chrony_exporter
 
-go 1.19
+go 1.20
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.3.2
-	github.com/facebook/time v0.0.0-20230714195408-02a9c21d15e5
+	github.com/facebook/time v0.0.0-20230927132939-0065a0b99445
 	github.com/go-kit/log v0.2.1
 	github.com/prometheus/client_golang v1.17.0
 	github.com/prometheus/common v0.44.0
