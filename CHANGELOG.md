@@ -1,5 +1,11 @@
 ## main / unreleased
 
+## 0.7.0 / 2023-12-25
+
+* [FEATURE] Add option to disable Reverse DNS Lookups #48
+* [ENHANCEMENT] Add gauges for frequency, skew and update interval #51
+* [BUGFIX] Fix swapped HELP text #47
+
 ## 0.6.1 / 2023-07-16
 
 * [ENHANCEMENT] Add a command line option to force chmod on the receiving unix socket. #45

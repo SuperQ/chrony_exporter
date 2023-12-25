@@ -6,7 +6,6 @@ go:
 repository:
   path: github.com/superq/chrony_exporter
 build:
-  flags: -a -tags 'netgo static_build'
   ldflags: |
     -X github.com/prometheus/common/version.Version={{.Version}}
     -X github.com/prometheus/common/version.Revision={{.Revision}}
