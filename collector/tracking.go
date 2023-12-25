@@ -111,6 +111,46 @@ var (
 		prometheus.GaugeValue,
 	}
 
+	trackingFrequency = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, trackingSubsystem, "frequency_ppms"),
+			"Rate by which the system's clock would be wrong if chronyd was not correcting it, in PPMs",
+			nil,
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	trackingResidualFrequency = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, trackingSubsystem, "residual_frequency_ppms"),
+			"For the currently selected reference source, the difference between the frequency it suggests and the one currently in use, in PPMs",
+			nil,
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	trackingSkew = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, trackingSubsystem, "skew_ppms"),
+			"The estimated error bound on the frequency, in PPMs",
+			nil,
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	trackingUpdateInterval = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, trackingSubsystem, "update_interval_seconds"),
+			"The time elapsed since the last measurement from the reference source was processed, in seconds",
+			nil,
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
 	trackingStratum = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, trackingSubsystem, "stratum"),
@@ -175,6 +215,18 @@ func (e Exporter) getTrackingMetrics(ch chan<- prometheus.Metric, client chrony.
 
 	ch <- trackingRootDispersion.mustNewConstMetric(tracking.RootDispersion)
 	level.Debug(e.logger).Log("msg", "Tracking Root dispersion", "root_dispersion", tracking.RootDispersion)
+
+	ch <- trackingFrequency.mustNewConstMetric(tracking.FreqPPM)
+	level.Debug(e.logger).Log("msg", "Tracking Frequency", "frequency", tracking.FreqPPM)
+
+	ch <- trackingResidualFrequency.mustNewConstMetric(tracking.ResidFreqPPM)
+	level.Debug(e.logger).Log("msg", "Tracking Residual Frequency", "residual_frequency", tracking.ResidFreqPPM)
+
+	ch <- trackingSkew.mustNewConstMetric(tracking.SkewPPM)
+	level.Debug(e.logger).Log("msg", "Tracking Skew", "skew", tracking.SkewPPM)
+
+	ch <- trackingUpdateInterval.mustNewConstMetric(tracking.LastUpdateInterval)
+	level.Debug(e.logger).Log("msg", "Tracking Last Update Interval", "update_interval", tracking.LastUpdateInterval)
 
 	ch <- trackingStratum.mustNewConstMetric(float64(tracking.Stratum))
 	level.Debug(e.logger).Log("msg", "Tracking Stratum", "stratum", tracking.Stratum)
