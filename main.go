@@ -32,21 +32,47 @@ import (
 )
 
 var (
-	address = kingpin.Flag(
-		"chrony.address",
-		"Address of the Chrony srever.",
-	).Default("[::1]:323").String()
-
-	toolkitFlags = kingpinflag.AddFlags(kingpin.CommandLine, ":9123")
-
+	conf   = collector.ChronyCollectorConfig{}
 	logger log.Logger
 )
 
 func main() {
+	kingpin.Flag(
+		"chrony.address",
+		"Address of the Chrony srever.",
+	).Default("[::1]:323").StringVar(&conf.Address)
+
+	kingpin.Flag(
+		"chrony.timeout",
+		"Timeout on requests to the Chrony srever.",
+	).Default("5s").DurationVar(&conf.Timeout)
+
+	kingpin.Flag(
+		"collector.tracking",
+		"Collect tracking metrics",
+	).Default("true").BoolVar(&conf.CollectTracking)
+
+	kingpin.Flag(
+		"collector.sources",
+		"Collect sources metrics",
+	).Default("false").BoolVar(&conf.CollectSource)
+
+	kingpin.Flag(
+		"collector.chmod-socket",
+		"Chmod 0666 the receiving unix datagram socket",
+	).Default("false").BoolVar(&conf.CollectChmodSocket)
+
+	kingpin.Flag(
+		"collector.dns-lookups", "do reverse DNS lookups",
+	).Default("true").BoolVar(&conf.CollectDNSLookups)
+
 	metricsPath := kingpin.Flag(
 		"web.telemetry-path",
 		"Path under which to expose metrics.",
 	).Default("/metrics").String()
+
+	toolkitFlags := kingpinflag.AddFlags(kingpin.CommandLine, ":9123")
+
 	promlogConfig := &promlog.Config{}
 	flag.AddFlags(kingpin.CommandLine, promlogConfig)
 	kingpin.CommandLine.UsageWriter(os.Stdout)
@@ -58,7 +84,7 @@ func main() {
 	level.Info(logger).Log("msg", "Starting chrony_exporter", "version", version.Info())
 	prometheus.MustRegister(version.NewCollector("chrony_exporter"))
 
-	exporter := collector.NewExporter(*address, logger)
+	exporter := collector.NewExporter(conf, logger)
 	prometheus.MustRegister(exporter)
 
 	http.Handle(*metricsPath, promhttp.Handler())
