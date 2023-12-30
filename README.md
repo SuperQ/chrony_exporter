@@ -2,8 +2,9 @@
 
 [![Build Status](https://circleci.com/gh/SuperQ/chrony_exporter/tree/main.svg?style=svg)](https://circleci.com/gh/SuperQ/chrony_exporter/tree/main)
 [![Docker Repository on Quay](https://quay.io/repository/superq/chrony-exporter/status "Docker Repository on Quay")](https://quay.io/repository/superq/chrony-exporter)
+[![Go Reference](https://pkg.go.dev/badge/github.com/superq/chrony_exporter.svg)](https://pkg.go.dev/github.com/superq/chrony_exporter)
 
-This is a [Prometheus Exporter](https://prometheus.io) for [Chrony NTP](https://chrony.tuxfamily.org/).
+This is a [Prometheus Exporter](https://prometheus.io) for [Chrony NTP](https://chrony-project.org/).
 
 ## Installation
 
@@ -67,7 +68,7 @@ When the exporter is run as root the flag `collector.chmod-socket` is needed as 
 
 You can use [Prometheus rules](https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/) to pre-compute some values.
 
-For example, the maximum clock error can be computed from several metrics as [documented in the Chrony man pages](https://chrony.tuxfamily.org/doc/4.3/chronyc.html).
+For example, the maximum clock error can be computed from several metrics as [documented in the Chrony man pages](https://chrony-project.org/doc/4.4/chrony.conf.html).
 
 ```yaml
 groups:

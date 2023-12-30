@@ -122,7 +122,7 @@ func (e Exporter) getSourcesMetrics(ch chan<- prometheus.Metric, client chrony.C
 	for _, r := range results {
 		sourceAddress := r.IPAddr.String()
 		sourceName := sourceAddress
-		if e.collectDNSLookups {
+		if e.dnsLookups {
 			// Ignore reverse lookup errors.
 			sourceNames, _ := net.LookupAddr(sourceAddress)
 			sort.Strings(sourceNames)

@@ -55,16 +55,16 @@ func main() {
 	kingpin.Flag(
 		"collector.sources",
 		"Collect sources metrics",
-	).Default("false").BoolVar(&conf.CollectSource)
+	).Default("false").BoolVar(&conf.CollectSources)
 
 	kingpin.Flag(
 		"collector.chmod-socket",
 		"Chmod 0666 the receiving unix datagram socket",
-	).Default("false").BoolVar(&conf.CollectChmodSocket)
+	).Default("false").BoolVar(&conf.ChmodSocket)
 
 	kingpin.Flag(
 		"collector.dns-lookups", "do reverse DNS lookups",
-	).Default("true").BoolVar(&conf.CollectDNSLookups)
+	).Default("true").BoolVar(&conf.DNSLookups)
 
 	metricsPath := kingpin.Flag(
 		"web.telemetry-path",
@@ -99,7 +99,7 @@ func main() {
 					Text:    "Metrics",
 				},
 				{
-					Address: "https://chrony.tuxfamily.org/",
+					Address: "https://chrony-project.org/",
 					Text:    "Chrony NTP",
 				},
 			},

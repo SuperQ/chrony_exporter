@@ -49,10 +49,10 @@ type Exporter struct {
 	address string
 	timeout time.Duration
 
-	collectSources     bool
-	collectTracking    bool
-	collectChmodSocket bool
-	collectDNSLookups  bool
+	collectSources  bool
+	collectTracking bool
+	chmodSocket     bool
+	dnsLookups      bool
 
 	logger log.Logger
 }
@@ -66,14 +66,22 @@ func (d *typedDesc) mustNewConstMetric(value float64, labels ...string) promethe
 	return prometheus.MustNewConstMetric(d.desc, d.valueType, value, labels...)
 }
 
+// ChronyCollectorConfig configures the exporter parameters.
 type ChronyCollectorConfig struct {
+	// Address is the Chrony server UDP command port.
 	Address string
+	// Timeout configures the socket timeout to the Chrony server.
 	Timeout time.Duration
 
-	CollectSource      bool
-	CollectTracking    bool
-	CollectChmodSocket bool
-	CollectDNSLookups  bool
+	// ChmodSocket will set the unix datagram socket to mode `0666` when true.
+	ChmodSocket bool
+	// DNSLookups will reverse resolve IP addresses to names when true.
+	DNSLookups bool
+
+	// CollectSources will configure the exporter to collect `chronyc sources`.
+	CollectSources bool
+	// CollectTracking will configure the exporter to collect `chronyc tracking`.
+	CollectTracking bool
 }
 
 func NewExporter(conf ChronyCollectorConfig, logger log.Logger) Exporter {
@@ -81,10 +89,10 @@ func NewExporter(conf ChronyCollectorConfig, logger log.Logger) Exporter {
 		address: conf.Address,
 		timeout: conf.Timeout,
 
-		collectSources:     conf.CollectSource,
-		collectTracking:    conf.CollectTracking,
-		collectChmodSocket: conf.CollectChmodSocket,
-		collectDNSLookups:  conf.CollectDNSLookups,
+		collectSources:  conf.CollectSources,
+		collectTracking: conf.CollectTracking,
+		chmodSocket:     conf.ChmodSocket,
+		dnsLookups:      conf.DNSLookups,
 
 		logger: logger,
 	}
@@ -106,7 +114,7 @@ func (e Exporter) dial() (net.Conn, error, func()) {
 		if err != nil {
 			return nil, err, func() { os.Remove(local) }
 		}
-		if e.collectChmodSocket {
+		if e.chmodSocket {
 			if err := os.Chmod(local, 0666); err != nil {
 				return nil, err, func() { conn.Close(); os.Remove(local) }
 			}
