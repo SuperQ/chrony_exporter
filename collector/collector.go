@@ -21,7 +21,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alecthomas/kingpin/v2"
 	"github.com/facebook/time/ntp/chrony"
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
@@ -33,11 +32,6 @@ const (
 )
 
 var (
-	collectTracking    = kingpin.Flag("collector.tracking", "Collect tracking metrics").Default("true").Bool()
-	collectSources     = kingpin.Flag("collector.sources", "Collect sources metrics").Default("false").Bool()
-	collectChmodSocket = kingpin.Flag("collector.chmod-socket", "Chmod 0666 the receiving unix datagram socket").Default("false").Bool()
-	collectDNSLookups  = kingpin.Flag("collector.dns-lookups", "do reverse DNS lookups").Default("true").Bool()
-
 	upMetric = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "", "up"),
@@ -72,16 +66,25 @@ func (d *typedDesc) mustNewConstMetric(value float64, labels ...string) promethe
 	return prometheus.MustNewConstMetric(d.desc, d.valueType, value, labels...)
 }
 
-func NewExporter(address string, logger log.Logger) Exporter {
+type ChronyCollectorConfig struct {
+	Address string
+	Timeout time.Duration
 
+	CollectSource      bool
+	CollectTracking    bool
+	CollectChmodSocket bool
+	CollectDNSLookups  bool
+}
+
+func NewExporter(conf ChronyCollectorConfig, logger log.Logger) Exporter {
 	return Exporter{
-		address: address,
-		timeout: 5 * time.Second,
+		address: conf.Address,
+		timeout: conf.Timeout,
 
-		collectSources:     *collectSources,
-		collectTracking:    *collectTracking,
-		collectChmodSocket: *collectChmodSocket,
-		collectDNSLookups:  *collectDNSLookups,
+		collectSources:     conf.CollectSource,
+		collectTracking:    conf.CollectTracking,
+		collectChmodSocket: conf.CollectChmodSocket,
+		collectDNSLookups:  conf.CollectDNSLookups,
 
 		logger: logger,
 	}
