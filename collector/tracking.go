@@ -166,7 +166,7 @@ func (e Exporter) chronyFormatName(tracking chrony.Tracking) string {
 	if tracking.IPAddr.IsUnspecified() {
 		return chrony.RefidToString(tracking.RefID)
 	}
-	if !e.collectDNSLookups {
+	if !e.dnsLookups {
 		return tracking.IPAddr.String()
 	}
 
