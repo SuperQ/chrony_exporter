@@ -1,5 +1,9 @@
 ## main / unreleased
 
+## 0.8.0 / 2023-12-30
+
+* [ENHANCEMENT] Improve ability to use collector as a library #55
+
 ## 0.7.0 / 2023-12-25
 
 * [FEATURE] Add option to disable Reverse DNS Lookups #48
