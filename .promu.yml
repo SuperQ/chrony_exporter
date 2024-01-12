@@ -2,7 +2,6 @@ go:
   # Whenever the Go version is updated here,
   # .circleci/config.yml should also be updated.
   version: 1.21
-
 repository:
   path: github.com/superq/chrony_exporter
 build:
@@ -15,6 +14,3 @@ build:
 tarball:
   files:
     - LICENSE
-crossbuild:
-  platforms:
-    - linux
