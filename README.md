@@ -53,6 +53,7 @@ Supported parameters include:
 - `--chrony.address`: the address/port (UDP) or path to Unix socket used to connect to chrony (default: `"[::1]:323"`)
 - `--collector.sources`: Enable/disable the collection of `chronyc sources` metrics. (Default: Disabled)
 - `--collector.tracking`: Enable/disable the collection of `chronyc tracking` metrics. (Default: Enabled)
+- `--collector.serverstats`: Enable/disable the collection of `chronyc serverstats` metrics. (Default: Disabled)
 - `--collector.dns-lookups`: Enable/disable reverse DNS Lookups. (Default: Enabled)
 
 To disable a collector, use `--no-`. (i.e. `--no-collector.tracking`)
