@@ -49,10 +49,11 @@ type Exporter struct {
 	address string
 	timeout time.Duration
 
-	collectSources  bool
-	collectTracking bool
-	chmodSocket     bool
-	dnsLookups      bool
+	collectSources     bool
+	collectTracking    bool
+	collectServerstats bool
+	chmodSocket        bool
+	dnsLookups         bool
 
 	logger log.Logger
 }
@@ -82,6 +83,8 @@ type ChronyCollectorConfig struct {
 	CollectSources bool
 	// CollectTracking will configure the exporter to collect `chronyc tracking`.
 	CollectTracking bool
+	// CollectServerstats will configure the exporter to collect `chronyc serverstats`.
+	CollectServerstats bool
 }
 
 func NewExporter(conf ChronyCollectorConfig, logger log.Logger) Exporter {
@@ -89,10 +92,11 @@ func NewExporter(conf ChronyCollectorConfig, logger log.Logger) Exporter {
 		address: conf.Address,
 		timeout: conf.Timeout,
 
-		collectSources:  conf.CollectSources,
-		collectTracking: conf.CollectTracking,
-		chmodSocket:     conf.ChmodSocket,
-		dnsLookups:      conf.DNSLookups,
+		collectSources:     conf.CollectSources,
+		collectTracking:    conf.CollectTracking,
+		collectServerstats: conf.CollectServerstats,
+		chmodSocket:        conf.ChmodSocket,
+		dnsLookups:         conf.DNSLookups,
 
 		logger: logger,
 	}
@@ -159,6 +163,14 @@ func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 		err = e.getTrackingMetrics(ch, client)
 		if err != nil {
 			level.Debug(e.logger).Log("msg", "Couldn't get tracking", "err", err)
+			up = 0
+		}
+	}
+
+	if e.collectServerstats {
+		err = e.getServerstatsMetrics(ch, client)
+		if err != nil {
+			level.Debug(e.logger).Log("msg", "Couldn't get serverstats", "err", err)
 			up = 0
 		}
 	}
