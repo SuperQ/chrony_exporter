@@ -28,8 +28,8 @@ const (
 var (
 	serverstatsNTPHits = typedDesc{
 		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_hits"),
-			"Received NTP packets from allowed senders",
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_packets_received_total"),
+			"The number of valid NTP requests received by the server.",
 			nil,
 			nil,
 		),
@@ -38,8 +38,8 @@ var (
 
 	serverstatsNKEHits = typedDesc{
 		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, serverstatsSubsystem, "nke_hits"),
-			"Accepted NTS-KE connections",
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "nts-ke_connections_accepted_total"),
+			"The number of NTS-KE connections accepted by the server.",
 			nil,
 			nil,
 		),
@@ -48,8 +48,8 @@ var (
 
 	serverstatsCMDHits = typedDesc{
 		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, serverstatsSubsystem, "cmd_hits"),
-			"Received command packets",
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "command_packets_received_total"),
+			"The number of command requests received by the server.",
 			nil,
 			nil,
 		),
@@ -58,8 +58,8 @@ var (
 
 	serverstatsNTPDrops = typedDesc{
 		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_drops"),
-			"Dropped NTP packets",
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_packets_dropped_total"),
+			"The number of NTP requests dropped by the server due to rate limiting.",
 			nil,
 			nil,
 		),
@@ -68,8 +68,8 @@ var (
 
 	serverstatsNKEDrops = typedDesc{
 		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, serverstatsSubsystem, "nke_drops"),
-			"Dropped NTS-KE connections",
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "nts-ke_connections_dropped_total"),
+			"The number of NTS-KE connections dropped by the server due to rate limiting.",
 			nil,
 			nil,
 		),
@@ -78,8 +78,8 @@ var (
 
 	serverstatsCMDDrops = typedDesc{
 		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, serverstatsSubsystem, "cmd_drops"),
-			"Dropped command packets",
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "command_packets_dropped_total"),
+			"The number of command requests dropped by the server due to rate limiting.",
 			nil,
 			nil,
 		),
@@ -88,8 +88,8 @@ var (
 
 	serverstatsLogDrops = typedDesc{
 		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, serverstatsSubsystem, "log_drops"),
-			"Dropped log entries",
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "client_log_records_dropped_total"),
+			"The number of client log records dropped by the server to limit the memory use.",
 			nil,
 			nil,
 		),
@@ -98,8 +98,8 @@ var (
 
 	serverstatsNTPAuthHits = typedDesc{
 		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_auth_hits"),
-			"Authenticated NTP packets",
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "auhtenticated_ntp_packets_total"),
+			"The number of received NTP requests that were authenticated (with a symmetric key or NTS).",
 			nil,
 			nil,
 		),
@@ -108,8 +108,8 @@ var (
 
 	serverstatsNTPInterleavedHits = typedDesc{
 		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_interleaved_hits"),
-			"Interleaved NTP packets",
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "interleaved_ntp_packets_total"),
+			"The number of received NTP requests that were detected to be in the interleaved mode.",
 			nil,
 			nil,
 		),
@@ -119,7 +119,7 @@ var (
 	serverstatsNTPTimestamps = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_timestamps_held"),
-			"NTP timestamps held",
+			"The number of pairs of receive and transmit timestamps that the server is currently holding in memory for clients using the interleaved mode.",
 			nil,
 			nil,
 		),
@@ -128,8 +128,8 @@ var (
 
 	serverstatsNTPSpanSeconds = typedDesc{
 		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_timestamps_span"),
-			"NTP timestamp span",
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_timestamp_span"),
+			"The interval (in seconds) covered by the currently held NTP timestamps.",
 			nil,
 			nil,
 		),
