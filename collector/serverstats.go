@@ -68,7 +68,7 @@ var (
 
 	serverstatsNKEDrops = typedDesc{
 		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, serverstatsSubsystem, "nts-ke_connections_dropped_total"),
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "nts_ke_connections_dropped_total"),
 			"The number of NTS-KE connections dropped by the server due to rate limiting.",
 			nil,
 			nil,
