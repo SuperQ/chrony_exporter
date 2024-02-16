@@ -38,7 +38,7 @@ var (
 
 	serverstatsNKEHits = typedDesc{
 		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, serverstatsSubsystem, "nts-ke_connections_accepted_total"),
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "nts_ke_connections_accepted_total"),
 			"The number of NTS-KE connections accepted by the server.",
 			nil,
 			nil,
