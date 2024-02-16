@@ -128,7 +128,7 @@ var (
 
 	serverstatsNTPSpanSeconds = typedDesc{
 		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_timestamp_span"),
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_timestamp_span_seconds"),
 			"The interval (in seconds) covered by the currently held NTP timestamps.",
 			nil,
 			nil,
