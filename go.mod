@@ -4,10 +4,10 @@ go 1.20
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
-	github.com/facebook/time v0.0.0-20231220110940-184fad01f5a0
+	github.com/facebook/time v0.0.0-20240210025230-f53bd82df511
 	github.com/go-kit/log v0.2.1
 	github.com/prometheus/client_golang v1.18.0
-	github.com/prometheus/common v0.46.0
+	github.com/prometheus/common v0.47.0
 	github.com/prometheus/exporter-toolkit v0.11.0
 )
 
