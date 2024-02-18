@@ -58,6 +58,11 @@ func main() {
 	).Default("false").BoolVar(&conf.CollectSources)
 
 	kingpin.Flag(
+		"collector.serverstats",
+		"Collect serverstats metrics",
+	).Default("false").BoolVar(&conf.CollectServerstats)
+
+	kingpin.Flag(
 		"collector.chmod-socket",
 		"Chmod 0666 the receiving unix datagram socket",
 	).Default("false").BoolVar(&conf.ChmodSocket)
