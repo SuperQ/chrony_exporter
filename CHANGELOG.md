@@ -1,5 +1,9 @@
 ## main / unreleased
 
+## 0.9.0 / 2024-02-18
+
+* [FEATURE] Add serverstats metrics collector #62
+
 ## 0.8.0 / 2023-12-30
 
 * [ENHANCEMENT] Improve ability to use collector as a library #55
