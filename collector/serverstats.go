@@ -146,7 +146,7 @@ func (e Exporter) getServerstatsMetrics(ch chan<- prometheus.Metric, client chro
 
 	serverstats, ok := packet.(*chrony.ReplyServerStats3)
 	if !ok {
-		return fmt.Errorf("Got wrong 'serverstats' response: %q", packet)
+		return fmt.Errorf("got wrong 'serverstats' response: %q", packet)
 	}
 
 	ch <- serverstatsNTPHits.mustNewConstMetric(float64(serverstats.NTPHits))
