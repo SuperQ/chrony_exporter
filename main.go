@@ -23,6 +23,7 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
+	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/promlog"
 	"github.com/prometheus/common/promlog/flag"
@@ -87,7 +88,7 @@ func main() {
 
 	logger = promlog.New(promlogConfig)
 	level.Info(logger).Log("msg", "Starting chrony_exporter", "version", version.Info())
-	prometheus.MustRegister(version.NewCollector("chrony_exporter"))
+	prometheus.MustRegister(versioncollector.NewCollector("chrony_exporter"))
 
 	exporter := collector.NewExporter(conf, logger)
 	prometheus.MustRegister(exporter)
