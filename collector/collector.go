@@ -18,7 +18,10 @@ import (
 	"net"
 	"os"
 	"path"
+	"slices"
+	"sort"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/facebook/time/ntp/chrony"
@@ -41,6 +44,9 @@ var (
 		),
 		prometheus.GaugeValue,
 	}
+
+	// Globally track scrapes to provide better logging context.
+	scrapeID atomic.Uint64
 )
 
 // Exporter collects chrony stats from the given server and exports
@@ -136,14 +142,18 @@ func (e Exporter) dial() (net.Conn, error, func()) {
 
 // Collect implements prometheus.Collector.
 func (e Exporter) Collect(ch chan<- prometheus.Metric) {
+	logger := log.With(e.logger, "scrape_id", scrapeID.Add(1))
+	start := time.Now()
+	level.Debug(logger).Log("msg", "Scrape starting")
 	var up float64
 	defer func() {
+		level.Debug(logger).Log("msg", "Scrape completed", "seconds", time.Since(start).Seconds())
 		ch <- upMetric.mustNewConstMetric(up)
 	}()
 	conn, err, cleanup := e.dial()
 	defer cleanup()
 	if err != nil {
-		level.Debug(e.logger).Log("msg", "Couldn't connect to chrony", "address", e.address, "err", err)
+		level.Debug(logger).Log("msg", "Couldn't connect to chrony", "address", e.address, "err", err)
 		return
 	}
 
@@ -152,26 +162,45 @@ func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 	client := chrony.Client{Sequence: 1, Connection: conn}
 
 	if e.collectSources {
-		err = e.getSourcesMetrics(ch, client)
+		err = e.getSourcesMetrics(logger, ch, client)
 		if err != nil {
-			level.Debug(e.logger).Log("msg", "Couldn't get sources", "err", err)
+			level.Debug(logger).Log("msg", "Couldn't get sources", "err", err)
 			up = 0
 		}
 	}
 
 	if e.collectTracking {
-		err = e.getTrackingMetrics(ch, client)
+		err = e.getTrackingMetrics(logger, ch, client)
 		if err != nil {
-			level.Debug(e.logger).Log("msg", "Couldn't get tracking", "err", err)
+			level.Debug(logger).Log("msg", "Couldn't get tracking", "err", err)
 			up = 0
 		}
 	}
 
 	if e.collectServerstats {
-		err = e.getServerstatsMetrics(ch, client)
+		err = e.getServerstatsMetrics(logger, ch, client)
 		if err != nil {
-			level.Debug(e.logger).Log("msg", "Couldn't get serverstats", "err", err)
+			level.Debug(logger).Log("msg", "Couldn't get serverstats", "err", err)
 			up = 0
 		}
 	}
+}
+
+func (e Exporter) dnsLookup(logger log.Logger, address net.IP) string {
+	start := time.Now()
+	defer func() {
+		level.Debug(logger).Log("msg", "DNS lookup took", "seconds", time.Since(start).Seconds())
+	}()
+	if !e.dnsLookups {
+		return address.String()
+	}
+	names, err := net.LookupAddr(address.String())
+	if err != nil || len(names) < 1 {
+		return address.String()
+	}
+	for i, name := range names {
+		names[i] = strings.TrimRight(name, ".")
+	}
+	sort.Strings(names)
+	return strings.Join(slices.Compact(names), ",")
 }

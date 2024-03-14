@@ -16,9 +16,9 @@ package collector
 import (
 	"fmt"
 	"net"
-	"strings"
 
 	"github.com/facebook/time/ntp/chrony"
+	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -162,74 +162,66 @@ var (
 	}
 )
 
-func (e Exporter) chronyFormatName(tracking chrony.Tracking) string {
+func (e Exporter) trackingFormatName(logger log.Logger, tracking chrony.Tracking) string {
 	if tracking.IPAddr.IsUnspecified() {
 		return chrony.RefidToString(tracking.RefID)
 	}
-	if !e.dnsLookups {
-		return tracking.IPAddr.String()
-	}
-
-	names, err := net.LookupAddr(tracking.IPAddr.String())
-	if err != nil || len(names) < 1 {
-		return tracking.IPAddr.String()
-	}
-	return strings.TrimRight(names[0], ".")
+	return e.dnsLookup(logger, tracking.IPAddr)
 }
 
-func (e Exporter) getTrackingMetrics(ch chan<- prometheus.Metric, client chrony.Client) error {
+func (e Exporter) getTrackingMetrics(logger log.Logger, ch chan<- prometheus.Metric, client chrony.Client) error {
 	packet, err := client.Communicate(chrony.NewTrackingPacket())
 	if err != nil {
 		return err
 	}
-	level.Debug(e.logger).Log("msg", "Got 'tracking' response", "tracking_packet", packet.GetStatus())
+	level.Debug(logger).Log("msg", "Got 'tracking' response", "tracking_packet", packet.GetStatus())
 
 	tracking, ok := packet.(*chrony.ReplyTracking)
 	if !ok {
 		return fmt.Errorf("Got wrong 'tracking' response: %q", packet)
 	}
 
-	ch <- trackingInfo.mustNewConstMetric(1.0, tracking.IPAddr.String(), e.chronyFormatName(tracking.Tracking), chrony.RefidAsHEX(tracking.RefID))
+	ch <- trackingInfo.mustNewConstMetric(1.0, tracking.IPAddr.String(), e.trackingFormatName(logger, tracking.Tracking), chrony.RefidAsHEX(tracking.RefID))
 
 	ch <- trackingLastOffset.mustNewConstMetric(tracking.LastOffset)
-	level.Debug(e.logger).Log("msg", "Tracking Last Offset", "offset", tracking.LastOffset)
+	level.Debug(logger).Log("msg", "Tracking Last Offset", "offset", tracking.LastOffset)
 
 	ch <- trackingRefTime.mustNewConstMetric(float64(tracking.RefTime.UnixNano()) / 1e9)
-	level.Debug(e.logger).Log("msg", "Tracking Ref Time", "ref_time", tracking.RefTime)
+	level.Debug(logger).Log("msg", "Tracking Ref Time", "ref_time", tracking.RefTime)
 
 	ch <- trackingSystemTime.mustNewConstMetric(float64(tracking.CurrentCorrection))
-	level.Debug(e.logger).Log("msg", "Tracking System Time", "system_time", tracking.CurrentCorrection)
+	level.Debug(logger).Log("msg", "Tracking System Time", "system_time", tracking.CurrentCorrection)
 
 	remoteTracking := 1.0
 	if tracking.IPAddr.Equal(trackingLocalIP) {
 		remoteTracking = 0.0
 	}
 	ch <- trackingRemoteTracking.mustNewConstMetric(remoteTracking)
-	level.Debug(e.logger).Log("msg", "Tracking is remote", "bool_value", remoteTracking)
+	level.Debug(logger).Log("msg", "Tracking is remote", "bool_value", remoteTracking)
 
 	ch <- trackingRMSOffset.mustNewConstMetric(tracking.RMSOffset)
-	level.Debug(e.logger).Log("msg", "Tracking RMS Offset", "rms_offset", tracking.RMSOffset)
+	level.Debug(logger).Log("msg", "Tracking RMS Offset", "rms_offset", tracking.RMSOffset)
 
 	ch <- trackingRootDelay.mustNewConstMetric(tracking.RootDelay)
-	level.Debug(e.logger).Log("msg", "Tracking Root delay", "root_delay", tracking.RootDelay)
+	level.Debug(logger).Log("msg", "Tracking Root delay", "root_delay", tracking.RootDelay)
 
 	ch <- trackingRootDispersion.mustNewConstMetric(tracking.RootDispersion)
-	level.Debug(e.logger).Log("msg", "Tracking Root dispersion", "root_dispersion", tracking.RootDispersion)
+	level.Debug(logger).Log("msg", "Tracking Root dispersion", "root_dispersion", tracking.RootDispersion)
 
 	ch <- trackingFrequency.mustNewConstMetric(tracking.FreqPPM)
-	level.Debug(e.logger).Log("msg", "Tracking Frequency", "frequency", tracking.FreqPPM)
+	level.Debug(logger).Log("msg", "Tracking Frequency", "frequency", tracking.FreqPPM)
 
 	ch <- trackingResidualFrequency.mustNewConstMetric(tracking.ResidFreqPPM)
-	level.Debug(e.logger).Log("msg", "Tracking Residual Frequency", "residual_frequency", tracking.ResidFreqPPM)
+	level.Debug(logger).Log("msg", "Tracking Residual Frequency", "residual_frequency", tracking.ResidFreqPPM)
 
 	ch <- trackingSkew.mustNewConstMetric(tracking.SkewPPM)
-	level.Debug(e.logger).Log("msg", "Tracking Skew", "skew", tracking.SkewPPM)
+	level.Debug(logger).Log("msg", "Tracking Skew", "skew", tracking.SkewPPM)
 
 	ch <- trackingUpdateInterval.mustNewConstMetric(tracking.LastUpdateInterval)
-	level.Debug(e.logger).Log("msg", "Tracking Last Update Interval", "update_interval", tracking.LastUpdateInterval)
+	level.Debug(logger).Log("msg", "Tracking Last Update Interval", "update_interval", tracking.LastUpdateInterval)
 
 	ch <- trackingStratum.mustNewConstMetric(float64(tracking.Stratum))
-	level.Debug(e.logger).Log("msg", "Tracking Stratum", "stratum", tracking.Stratum)
+	level.Debug(logger).Log("msg", "Tracking Stratum", "stratum", tracking.Stratum)
 
 	return nil
 }
