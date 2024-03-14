@@ -99,7 +99,7 @@ var (
 
 	serverstatsNTPAuthHits = typedDesc{
 		prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, serverstatsSubsystem, "auhtenticated_ntp_packets_total"),
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "authenticated_ntp_packets_total"),
 			"The number of received NTP requests that were authenticated (with a symmetric key or NTS).",
 			nil,
 			nil,
