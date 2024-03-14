@@ -1,5 +1,7 @@
 ## main / unreleased
 
+## 0.9.1 / 2024-03-14
+
 * [BUGFIX] Improve DNS lookup debugging #70
 
 ## 0.9.0 / 2024-02-18
