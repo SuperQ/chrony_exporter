@@ -17,11 +17,9 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
-	"net"
-	"sort"
-	"strings"
 
 	"github.com/facebook/time/ntp/chrony"
+	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -92,12 +90,12 @@ var (
 	}
 )
 
-func (e Exporter) getSourcesMetrics(ch chan<- prometheus.Metric, client chrony.Client) error {
+func (e Exporter) getSourcesMetrics(logger log.Logger, ch chan<- prometheus.Metric, client chrony.Client) error {
 	packet, err := client.Communicate(chrony.NewSourcesPacket())
 	if err != nil {
 		return err
 	}
-	level.Debug(e.logger).Log("msg", "Got 'sources' response", "sources_packet", packet.GetStatus())
+	level.Debug(logger).Log("msg", "Got 'sources' response", "sources_packet", packet.GetStatus())
 
 	sources, ok := packet.(*chrony.ReplySources)
 	if !ok {
@@ -107,7 +105,7 @@ func (e Exporter) getSourcesMetrics(ch chan<- prometheus.Metric, client chrony.C
 	results := make([]chrony.ReplySourceData, sources.NSources)
 
 	for i := 0; i < int(sources.NSources); i++ {
-		level.Debug(e.logger).Log("msg", "Fetching source", "source", i)
+		level.Debug(logger).Log("msg", "Fetching source", "source", i)
 		packet, err = client.Communicate(chrony.NewSourceDataPacket(int32(i)))
 		if err != nil {
 			return fmt.Errorf("Failed to get sourcedata response: %d", i)
@@ -121,13 +119,7 @@ func (e Exporter) getSourcesMetrics(ch chan<- prometheus.Metric, client chrony.C
 
 	for _, r := range results {
 		sourceAddress := r.IPAddr.String()
-		sourceName := sourceAddress
-		if e.dnsLookups {
-			// Ignore reverse lookup errors.
-			sourceNames, _ := net.LookupAddr(sourceAddress)
-			sort.Strings(sourceNames)
-			sourceName = strings.Join(sourceNames, ",")
-		}
+		sourceName := e.dnsLookup(logger, r.IPAddr)
 
 		if r.Mode == chrony.SourceModeRef && r.IPAddr.To4() != nil {
 			sourceName = chrony.RefidToString(binary.BigEndian.Uint32(r.IPAddr))
