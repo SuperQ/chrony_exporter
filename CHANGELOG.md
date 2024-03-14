@@ -1,5 +1,7 @@
 ## main / unreleased
 
+* [BUGFIX] Improve DNS lookup debugging #70
+
 ## 0.9.0 / 2024-02-18
 
 * [FEATURE] Add serverstats metrics collector #62
