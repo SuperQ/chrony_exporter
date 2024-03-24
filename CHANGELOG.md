@@ -1,5 +1,9 @@
 ## main / unreleased
 
+## 0.9.2 / 2024-03-24
+
+* [BUGFIX] Fix typo in serverstat metric name #73
+
 ## 0.9.1 / 2024-03-14
 
 * [BUGFIX] Improve DNS lookup debugging #70
