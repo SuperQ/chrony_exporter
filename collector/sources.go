@@ -17,6 +17,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
+	"math/bits"
 
 	"github.com/facebook/time/ntp/chrony"
 	"github.com/go-kit/log"
@@ -33,6 +34,26 @@ var (
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, sourcesSubsystem, "last_sample_age_seconds"),
 			"Chrony sources last good sample age in seconds",
+			[]string{"source_address", "source_name"},
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	sourcesLastReachRatio = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, sourcesSubsystem, "reachability_ratio"),
+			"Chrony sources ratio of packet reachability",
+			[]string{"source_address", "source_name"},
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	sourcesLastReachSuccess = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, sourcesSubsystem, "reachability_success"),
+			"Chrony sources last poll reachability success",
 			[]string{"source_address", "source_name"},
 			nil,
 		),
@@ -125,7 +146,13 @@ func (e Exporter) getSourcesMetrics(logger log.Logger, ch chan<- prometheus.Metr
 			sourceName = chrony.RefidToString(binary.BigEndian.Uint32(r.IPAddr))
 		}
 
+		// Compute the reachability from the Reachability bits.
+		lastReachRatio := float64(bits.OnesCount8(uint8(r.Reachability))) / 8.0
+		lastReachSuccess := uint8(r.Reachability) & 1
+
 		ch <- sourcesLastRx.mustNewConstMetric(float64(r.SinceSample), sourceAddress, sourceName)
+		ch <- sourcesLastReachRatio.mustNewConstMetric(lastReachRatio, sourceAddress, sourceName)
+		ch <- sourcesLastReachSuccess.mustNewConstMetric(float64(lastReachSuccess), sourceAddress, sourceName)
 		ch <- sourcesLastSample.mustNewConstMetric(r.LatestMeas, sourceAddress, sourceName)
 		ch <- sourcesLastSampleErr.mustNewConstMetric(r.LatestMeasErr, sourceAddress, sourceName)
 		ch <- sourcesPollInterval.mustNewConstMetric(math.Pow(2, float64(r.Poll)), sourceAddress, sourceName)
