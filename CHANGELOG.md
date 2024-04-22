@@ -1,5 +1,9 @@
 ## main / unreleased
 
+## 0.10.0 / 2024-04-20
+
+* [FEATURE] Add sources reachability metrics #76
+
 ## 0.9.2 / 2024-03-24
 
 * [BUGFIX] Fix typo in serverstat metric name #73
