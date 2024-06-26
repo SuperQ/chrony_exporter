@@ -1,5 +1,9 @@
 ## main / unreleased
 
+## 0.10.1 / 2024-6-26
+
+* [BUGFIX] Update facebook/time to fix new Chrony version handling #83
+
 ## 0.10.0 / 2024-04-20
 
 * [FEATURE] Add sources reachability metrics #76
