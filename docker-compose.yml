@@ -6,7 +6,7 @@ services:
     pull_policy: always
     container_name: chrony_exporter
     command:
-      - '--chrony-address=host.docker.internal:323'
+      - '--chrony.address=host.docker.internal:323'
       - '--collector.sources'
     ports:
       - '9123:9123'
