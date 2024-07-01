@@ -136,6 +136,66 @@ var (
 		),
 		prometheus.GaugeValue,
 	}
+
+	serverstatsNTPDaemonRxTimestamps = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_daemon_rx_timestamps"),
+			"NTP daemon RX timestamps",
+			nil,
+			nil,
+		),
+		prometheus.CounterValue,
+	}
+
+	serverstatsNTPDaemonTxTimestamps = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_daemon_tx_timestamps"),
+			"NTP daemon TX timestamps",
+			nil,
+			nil,
+		),
+		prometheus.CounterValue,
+	}
+
+	serverstatsNTPKernelRxTimestamps = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_kernel_rx_timestamps"),
+			"NTP kernel RX timestamps",
+			nil,
+			nil,
+		),
+		prometheus.CounterValue,
+	}
+
+	serverstatsNTPKernelTxTimestamps = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_kernel_tx_timestamps"),
+			"NTP kernel TX timestamps",
+			nil,
+			nil,
+		),
+		prometheus.CounterValue,
+	}
+
+	serverstatsNTPHwRxTimestamps = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_hw_rx_timestamps"),
+			"NTP hardware RX timestamps",
+			nil,
+			nil,
+		),
+		prometheus.CounterValue,
+	}
+
+	serverstatsNTPHwTxTimestamps = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, serverstatsSubsystem, "ntp_hw_tx_timestamps"),
+			"NTP hardware TX timestamps",
+			nil,
+			nil,
+		),
+		prometheus.CounterValue,
+	}
 )
 
 func (e Exporter) getServerstatsMetrics(logger log.Logger, ch chan<- prometheus.Metric, client chrony.Client) error {
@@ -145,7 +205,7 @@ func (e Exporter) getServerstatsMetrics(logger log.Logger, ch chan<- prometheus.
 	}
 	level.Debug(logger).Log("msg", "Got 'serverstats' response", "serverstats_packet", packet.GetStatus())
 
-	serverstats, ok := packet.(*chrony.ReplyServerStats3)
+	serverstats, ok := packet.(*chrony.ReplyServerStats4)
 	if !ok {
 		return fmt.Errorf("got wrong 'serverstats' response: %q", packet)
 	}
@@ -182,6 +242,24 @@ func (e Exporter) getServerstatsMetrics(logger log.Logger, ch chan<- prometheus.
 
 	ch <- serverstatsNTPSpanSeconds.mustNewConstMetric(float64(serverstats.NTPSpanSeconds))
 	level.Debug(logger).Log("msg", "Serverstats Timestamps Span", "ntp_timestamps_span", serverstats.NTPSpanSeconds)
+
+	ch <- serverstatsNTPDaemonRxTimestamps.mustNewConstMetric(float64(serverstats.NTPDaemonRxtimestamps))
+	level.Debug(logger).Log("msg", "Serverstats NTP daemon RX timestamps", "ntp_daemon_rx_timestamps", serverstats.NTPDaemonRxtimestamps)
+
+	ch <- serverstatsNTPDaemonTxTimestamps.mustNewConstMetric(float64(serverstats.NTPDaemonTxtimestamps))
+	level.Debug(logger).Log("msg", "Serverstats NTP daemon TX timestamps", "ntp_daemon_tx_timestamps", serverstats.NTPDaemonTxtimestamps)
+
+	ch <- serverstatsNTPKernelRxTimestamps.mustNewConstMetric(float64(serverstats.NTPKernelRxtimestamps))
+	level.Debug(logger).Log("msg", "Serverstats NTP Kernel RX timestamps", "ntp_kernel_rx_timestamps", serverstats.NTPKernelRxtimestamps)
+
+	ch <- serverstatsNTPKernelTxTimestamps.mustNewConstMetric(float64(serverstats.NTPKernelTxtimestamps))
+	level.Debug(logger).Log("msg", "Serverstats NTP Kernel TX timestamps", "ntp_kernel_tx_timestamps", serverstats.NTPKernelTxtimestamps)
+
+	ch <- serverstatsNTPHwRxTimestamps.mustNewConstMetric(float64(serverstats.NTPHwRxTimestamps))
+	level.Debug(logger).Log("msg", "Serverstats NTP Hw RX timestamps", "ntp_hw_rx_timestamps", serverstats.NTPHwRxTimestamps)
+
+	ch <- serverstatsNTPHwTxTimestamps.mustNewConstMetric(float64(serverstats.NTPHwTxTimestamps))
+	level.Debug(logger).Log("msg", "Serverstats NTP Hw TX timestamps", "ntp_hw_tx_timestamps", serverstats.NTPHwTxTimestamps)
 
 	return nil
 }
