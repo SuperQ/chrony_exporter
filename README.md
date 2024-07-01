@@ -49,12 +49,36 @@ A minimal invocation looks like this:
 
 Supported parameters include:
 
-- `--web.listen-address`: the address/port to listen on (default: `":9123"`)
-- `--chrony.address`: the address/port (UDP) or path to Unix socket used to connect to chrony (default: `"[::1]:323"`)
-- `--collector.sources`: Enable/disable the collection of `chronyc sources` metrics. (Default: Disabled)
-- `--collector.tracking`: Enable/disable the collection of `chronyc tracking` metrics. (Default: Enabled)
-- `--collector.serverstats`: Enable/disable the collection of `chronyc serverstats` metrics. This collector only works when chrony is accessed through the Unix socket. (Default: Disabled)
-- `--collector.dns-lookups`: Enable/disable reverse DNS Lookups. (Default: Enabled)
+```
+usage: chrony_exporter [<flags>]
+
+
+Flags:
+  -h, --[no-]help                Show context-sensitive help (also try --help-long and --help-man).
+      --chrony.address="[::1]:323"  
+                                 Address of the Chrony srever.
+      --chrony.timeout=5s        Timeout on requests to the Chrony srever.
+      --[no-]collector.tracking  Collect tracking metrics
+      --[no-]collector.sources   Collect sources metrics
+      --[no-]collector.serverstats  
+                                 Collect serverstats metrics
+      --[no-]collector.chmod-socket  
+                                 Chmod 0666 the receiving unix datagram socket
+      --[no-]collector.dns-lookups  
+                                 do reverse DNS lookups
+      --web.telemetry-path="/metrics"  
+                                 Path under which to expose metrics.
+      --[no-]web.systemd-socket  Use systemd socket activation listeners instead of port listeners (Linux only).
+      --web.listen-address=:9123 ...  
+                                 Addresses on which to expose metrics and web interface. Repeatable for multiple
+                                 addresses.
+      --web.config.file=""       Path to configuration file that can enable TLS or authentication. See:
+                                 https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-configuration.md
+      --log.level=info           Only log messages with the given severity or above. One of: [debug, info, warn,
+                                 error]
+      --log.format=logfmt        Output format of log messages. One of: [logfmt, json]
+      --[no-]version             Show application version.
+```
 
 To disable a collector, use `--no-`. (i.e. `--no-collector.tracking`)
 
