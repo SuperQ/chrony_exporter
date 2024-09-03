@@ -15,6 +15,7 @@ package collector
 
 import (
 	"fmt"
+	stdlog "log"
 	"net"
 	"os"
 	"path"
@@ -160,6 +161,8 @@ func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 	up = 1
 
 	client := chrony.Client{Sequence: 1, Connection: conn}
+
+	chrony.Logger = stdlog.New(log.NewStdlibAdapter(level.Debug(logger)), "", 0)
 
 	if e.collectSources {
 		err = e.getSourcesMetrics(logger, ch, client)
