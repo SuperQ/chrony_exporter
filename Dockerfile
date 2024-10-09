@@ -2,6 +2,7 @@ ARG ARCH="amd64"
 ARG OS="linux"
 FROM quay.io/prometheus/busybox-${OS}-${ARCH}:latest
 LABEL maintainer="Ben Kochie <superq@gmail.com>"
+LABEL org.opencontainers.image.source="https://github.com/SuperQ/chrony_exporter"
 
 ARG ARCH="amd64"
 ARG OS="linux"
