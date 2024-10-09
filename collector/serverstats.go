@@ -15,10 +15,9 @@ package collector
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/facebook/time/ntp/chrony"
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -138,12 +137,12 @@ var (
 	}
 )
 
-func (e Exporter) getServerstatsMetrics(logger log.Logger, ch chan<- prometheus.Metric, client chrony.Client) error {
+func (e Exporter) getServerstatsMetrics(logger *slog.Logger, ch chan<- prometheus.Metric, client chrony.Client) error {
 	packet, err := client.Communicate(chrony.NewServerStatsPacket())
 	if err != nil {
 		return err
 	}
-	level.Debug(logger).Log("msg", "Got 'serverstats' response", "serverstats_packet", packet.GetStatus())
+	logger.Debug("Got 'serverstats' response", "serverstats_packet", packet.GetStatus())
 
 	serverstats, ok := packet.(*chrony.ReplyServerStats3)
 	if !ok {
@@ -151,37 +150,37 @@ func (e Exporter) getServerstatsMetrics(logger log.Logger, ch chan<- prometheus.
 	}
 
 	ch <- serverstatsNTPHits.mustNewConstMetric(float64(serverstats.NTPHits))
-	level.Debug(logger).Log("msg", "Serverstats NTP Hits", "ntp_hits", serverstats.NTPHits)
+	logger.Debug("Serverstats NTP Hits", "ntp_hits", serverstats.NTPHits)
 
 	ch <- serverstatsNKEHits.mustNewConstMetric(float64(serverstats.NKEHits))
-	level.Debug(logger).Log("msg", "Serverstats NKE Hits", "nke_hits", serverstats.NKEHits)
+	logger.Debug("Serverstats NKE Hits", "nke_hits", serverstats.NKEHits)
 
 	ch <- serverstatsCMDHits.mustNewConstMetric(float64(serverstats.CMDHits))
-	level.Debug(logger).Log("msg", "Serverstats CMD Hits", "cmd_hits", serverstats.CMDHits)
+	logger.Debug("Serverstats CMD Hits", "cmd_hits", serverstats.CMDHits)
 
 	ch <- serverstatsNTPDrops.mustNewConstMetric(float64(serverstats.NTPDrops))
-	level.Debug(logger).Log("msg", "Serverstats NTP Drops", "ntp_drops", serverstats.NTPDrops)
+	logger.Debug("Serverstats NTP Drops", "ntp_drops", serverstats.NTPDrops)
 
 	ch <- serverstatsNKEDrops.mustNewConstMetric(float64(serverstats.NKEDrops))
-	level.Debug(logger).Log("msg", "Serverstats NKE Drops", "nke_drops", serverstats.NKEDrops)
+	logger.Debug("Serverstats NKE Drops", "nke_drops", serverstats.NKEDrops)
 
 	ch <- serverstatsCMDDrops.mustNewConstMetric(float64(serverstats.CMDDrops))
-	level.Debug(logger).Log("msg", "Serverstats CMD Drops", "cmd_drops", serverstats.CMDDrops)
+	logger.Debug("Serverstats CMD Drops", "cmd_drops", serverstats.CMDDrops)
 
 	ch <- serverstatsLogDrops.mustNewConstMetric(float64(serverstats.LogDrops))
-	level.Debug(logger).Log("msg", "Serverstats Log Drops", "log_drops", serverstats.LogDrops)
+	logger.Debug("Serverstats Log Drops", "log_drops", serverstats.LogDrops)
 
 	ch <- serverstatsNTPAuthHits.mustNewConstMetric(float64(serverstats.NTPAuthHits))
-	level.Debug(logger).Log("msg", "Serverstats Authenticated Packets", "auth_hits", serverstats.NTPAuthHits)
+	logger.Debug("Serverstats Authenticated Packets", "auth_hits", serverstats.NTPAuthHits)
 
 	ch <- serverstatsNTPInterleavedHits.mustNewConstMetric(float64(serverstats.NTPInterleavedHits))
-	level.Debug(logger).Log("msg", "Serverstats Interleaved Packets", "interleaved_hits", serverstats.NTPInterleavedHits)
+	logger.Debug("Serverstats Interleaved Packets", "interleaved_hits", serverstats.NTPInterleavedHits)
 
 	ch <- serverstatsNTPTimestamps.mustNewConstMetric(float64(serverstats.NTPTimestamps))
-	level.Debug(logger).Log("msg", "Serverstats Timestamps Held", "ntp_timestamps_held", serverstats.NTPTimestamps)
+	logger.Debug("Serverstats Timestamps Held", "ntp_timestamps_held", serverstats.NTPTimestamps)
 
 	ch <- serverstatsNTPSpanSeconds.mustNewConstMetric(float64(serverstats.NTPSpanSeconds))
-	level.Debug(logger).Log("msg", "Serverstats Timestamps Span", "ntp_timestamps_span", serverstats.NTPSpanSeconds)
+	logger.Debug("Serverstats Timestamps Span", "ntp_timestamps_span", serverstats.NTPSpanSeconds)
 
 	return nil
 }

@@ -15,6 +15,7 @@ package collector
 
 import (
 	"fmt"
+	"log/slog"
 	"net"
 	"os"
 	"path"
@@ -25,8 +26,6 @@ import (
 	"time"
 
 	"github.com/facebook/time/ntp/chrony"
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -61,7 +60,7 @@ type Exporter struct {
 	chmodSocket        bool
 	dnsLookups         bool
 
-	logger log.Logger
+	logger *slog.Logger
 }
 
 type typedDesc struct {
@@ -93,7 +92,7 @@ type ChronyCollectorConfig struct {
 	CollectServerstats bool
 }
 
-func NewExporter(conf ChronyCollectorConfig, logger log.Logger) Exporter {
+func NewExporter(conf ChronyCollectorConfig, logger *slog.Logger) Exporter {
 	return Exporter{
 		address: conf.Address,
 		timeout: conf.Timeout,
@@ -131,7 +130,7 @@ func (e Exporter) dial() (net.Conn, error, func()) {
 		}
 		err = conn.SetReadDeadline(time.Now().Add(e.timeout))
 		if err != nil {
-			level.Debug(e.logger).Log("msg", "Couldn't set read-timeout for unix datagram socket", "err", err)
+			e.logger.Debug("Couldn't set read-timeout for unix datagram socket", "err", err)
 		}
 		return conn, nil, func() { conn.Close(); os.Remove(local) }
 	}
@@ -142,18 +141,18 @@ func (e Exporter) dial() (net.Conn, error, func()) {
 
 // Collect implements prometheus.Collector.
 func (e Exporter) Collect(ch chan<- prometheus.Metric) {
-	logger := log.With(e.logger, "scrape_id", scrapeID.Add(1))
+	logger := e.logger.With("scrape_id", scrapeID.Add(1))
 	start := time.Now()
-	level.Debug(logger).Log("msg", "Scrape starting")
+	logger.Debug("Scrape starting")
 	var up float64
 	defer func() {
-		level.Debug(logger).Log("msg", "Scrape completed", "seconds", time.Since(start).Seconds())
+		logger.Debug("Scrape completed", "seconds", time.Since(start).Seconds())
 		ch <- upMetric.mustNewConstMetric(up)
 	}()
 	conn, err, cleanup := e.dial()
 	defer cleanup()
 	if err != nil {
-		level.Debug(logger).Log("msg", "Couldn't connect to chrony", "address", e.address, "err", err)
+		logger.Debug("Couldn't connect to chrony", "address", e.address, "err", err)
 		return
 	}
 
@@ -164,7 +163,7 @@ func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 	if e.collectSources {
 		err = e.getSourcesMetrics(logger, ch, client)
 		if err != nil {
-			level.Debug(logger).Log("msg", "Couldn't get sources", "err", err)
+			logger.Debug("Couldn't get sources", "err", err)
 			up = 0
 		}
 	}
@@ -172,7 +171,7 @@ func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 	if e.collectTracking {
 		err = e.getTrackingMetrics(logger, ch, client)
 		if err != nil {
-			level.Debug(logger).Log("msg", "Couldn't get tracking", "err", err)
+			logger.Debug("Couldn't get tracking", "err", err)
 			up = 0
 		}
 	}
@@ -180,16 +179,16 @@ func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 	if e.collectServerstats {
 		err = e.getServerstatsMetrics(logger, ch, client)
 		if err != nil {
-			level.Debug(logger).Log("msg", "Couldn't get serverstats", "err", err)
+			logger.Debug("Couldn't get serverstats", "err", err)
 			up = 0
 		}
 	}
 }
 
-func (e Exporter) dnsLookup(logger log.Logger, address net.IP) string {
+func (e Exporter) dnsLookup(logger *slog.Logger, address net.IP) string {
 	start := time.Now()
 	defer func() {
-		level.Debug(logger).Log("msg", "DNS lookup took", "seconds", time.Since(start).Seconds())
+		logger.Debug("DNS lookup took", "seconds", time.Since(start).Seconds())
 	}()
 	if !e.dnsLookups {
 		return address.String()
