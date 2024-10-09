@@ -137,6 +137,44 @@ var (
 	}
 )
 
+func parseServerStatsPacket(p chrony.ResponsePacket) (chrony.ReplyServerStats4, error) {
+	var serverStats chrony.ReplyServerStats4
+	switch stats := p.(type) {
+	case *chrony.ReplyServerStats:
+		serverStats.NTPHits = uint64(stats.NTPHits)
+		serverStats.CMDHits = uint64(stats.CMDHits)
+		serverStats.NTPDrops = uint64(stats.NTPDrops)
+		serverStats.CMDDrops = uint64(stats.CMDDrops)
+		serverStats.LogDrops = uint64(stats.LogDrops)
+	case *chrony.ReplyServerStats2:
+		serverStats.NTPHits = uint64(stats.NTPHits)
+		serverStats.NKEHits = uint64(stats.NKEHits)
+		serverStats.CMDHits = uint64(stats.CMDHits)
+		serverStats.NTPDrops = uint64(stats.NTPDrops)
+		serverStats.NKEDrops = uint64(stats.NKEDrops)
+		serverStats.CMDDrops = uint64(stats.CMDDrops)
+		serverStats.LogDrops = uint64(stats.LogDrops)
+		serverStats.NTPAuthHits = uint64(stats.NTPAuthHits)
+	case *chrony.ReplyServerStats3:
+		serverStats.NTPHits = uint64(stats.NTPHits)
+		serverStats.NKEHits = uint64(stats.NKEHits)
+		serverStats.CMDHits = uint64(stats.CMDHits)
+		serverStats.NTPDrops = uint64(stats.NTPDrops)
+		serverStats.NKEDrops = uint64(stats.NKEDrops)
+		serverStats.CMDDrops = uint64(stats.CMDDrops)
+		serverStats.LogDrops = uint64(stats.LogDrops)
+		serverStats.NTPAuthHits = uint64(stats.NTPAuthHits)
+		serverStats.NTPInterleavedHits = uint64(stats.NTPInterleavedHits)
+		serverStats.NTPTimestamps = uint64(stats.NTPTimestamps)
+		serverStats.NTPSpanSeconds = uint64(stats.NTPSpanSeconds)
+	case *chrony.ReplyServerStats4:
+		serverStats = *stats
+	default:
+		return serverStats, fmt.Errorf("invalid 'serverstats' packet type: %q", p)
+	}
+	return serverStats, nil
+}
+
 func (e Exporter) getServerstatsMetrics(logger *slog.Logger, ch chan<- prometheus.Metric, client chrony.Client) error {
 	packet, err := client.Communicate(chrony.NewServerStatsPacket())
 	if err != nil {
@@ -144,9 +182,9 @@ func (e Exporter) getServerstatsMetrics(logger *slog.Logger, ch chan<- prometheu
 	}
 	logger.Debug("Got 'serverstats' response", "serverstats_packet", packet.GetStatus())
 
-	serverstats, ok := packet.(*chrony.ReplyServerStats3)
-	if !ok {
-		return fmt.Errorf("got wrong 'serverstats' response: %q", packet)
+	serverstats, err := parseServerStatsPacket(packet)
+	if err != nil {
+		return fmt.Errorf("Unable to parse 'serverstats' packet: %w", err)
 	}
 
 	ch <- serverstatsNTPHits.mustNewConstMetric(float64(serverstats.NTPHits))
