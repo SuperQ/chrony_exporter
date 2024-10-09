@@ -16,12 +16,11 @@ package collector
 import (
 	"encoding/binary"
 	"fmt"
+	"log/slog"
 	"math"
 	"math/bits"
 
 	"github.com/facebook/time/ntp/chrony"
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -111,12 +110,12 @@ var (
 	}
 )
 
-func (e Exporter) getSourcesMetrics(logger log.Logger, ch chan<- prometheus.Metric, client chrony.Client) error {
+func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Metric, client chrony.Client) error {
 	packet, err := client.Communicate(chrony.NewSourcesPacket())
 	if err != nil {
 		return err
 	}
-	level.Debug(logger).Log("msg", "Got 'sources' response", "sources_packet", packet.GetStatus())
+	logger.Debug("Got 'sources' response", "sources_packet", packet.GetStatus())
 
 	sources, ok := packet.(*chrony.ReplySources)
 	if !ok {
@@ -126,7 +125,7 @@ func (e Exporter) getSourcesMetrics(logger log.Logger, ch chan<- prometheus.Metr
 	results := make([]chrony.ReplySourceData, sources.NSources)
 
 	for i := 0; i < int(sources.NSources); i++ {
-		level.Debug(logger).Log("msg", "Fetching source", "source", i)
+		logger.Debug("Fetching source", "source", i)
 		packet, err = client.Communicate(chrony.NewSourceDataPacket(int32(i)))
 		if err != nil {
 			return fmt.Errorf("Failed to get sourcedata response: %d", i)
