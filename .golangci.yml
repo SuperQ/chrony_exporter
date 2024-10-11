@@ -3,6 +3,7 @@ linters:
   enable:
     - misspell
     - revive
+    - sloglint
 
 linters-settings:
   errcheck:

@@ -111,7 +111,7 @@ func main() {
 		}
 		landingPage, err := web.NewLandingPage(landingConfig)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Error("error creating landing page", "err", err)
 			os.Exit(1)
 		}
 		http.Handle("/", landingPage)
