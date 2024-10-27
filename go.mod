@@ -4,9 +4,9 @@ go 1.22
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
-	github.com/facebook/time v0.0.0-20241008124143-a9e1d3c8047e
-	github.com/prometheus/client_golang v1.20.4
-	github.com/prometheus/common v0.60.0
+	github.com/facebook/time v0.0.0-20241025155019-5fd305f7108f
+	github.com/prometheus/client_golang v1.20.5
+	github.com/prometheus/common v0.60.1
 	github.com/prometheus/exporter-toolkit v0.13.0
 )
 

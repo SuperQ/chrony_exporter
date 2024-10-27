@@ -1,5 +1,11 @@
 ## main / unreleased
 
+## 0.11.0 / 2024-10-27
+
+* [CHANGE] Update logging to slog #95
+* [CHANGE] Only expose serverstats for correct veersions #100
+* [ENHANCEMENT] Add support for Chrony >= 4.5 server stats #87 #96
+
 ## 0.10.1 / 2024-06-26
 
 * [BUGFIX] Update facebook/time to fix new Chrony version handling #83
