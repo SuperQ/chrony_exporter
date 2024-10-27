@@ -247,56 +247,56 @@ func (e Exporter) getServerstatsMetrics(logger *slog.Logger, ch chan<- prometheu
 		return fmt.Errorf("Unable to parse 'serverstats' packet: %w", err)
 	}
 
+	// Stats that only exist in all versions.
 	ch <- serverstatsNTPHits.mustNewConstMetric(float64(serverstats.NTPHits))
 	logger.Debug("Serverstats NTP Hits", "ntp_hits", serverstats.NTPHits)
-
-	ch <- serverstatsNKEHits.mustNewConstMetric(float64(serverstats.NKEHits))
-	logger.Debug("Serverstats NKE Hits", "nke_hits", serverstats.NKEHits)
-
 	ch <- serverstatsCMDHits.mustNewConstMetric(float64(serverstats.CMDHits))
 	logger.Debug("Serverstats CMD Hits", "cmd_hits", serverstats.CMDHits)
-
 	ch <- serverstatsNTPDrops.mustNewConstMetric(float64(serverstats.NTPDrops))
 	logger.Debug("Serverstats NTP Drops", "ntp_drops", serverstats.NTPDrops)
-
-	ch <- serverstatsNKEDrops.mustNewConstMetric(float64(serverstats.NKEDrops))
-	logger.Debug("Serverstats NKE Drops", "nke_drops", serverstats.NKEDrops)
-
 	ch <- serverstatsCMDDrops.mustNewConstMetric(float64(serverstats.CMDDrops))
 	logger.Debug("Serverstats CMD Drops", "cmd_drops", serverstats.CMDDrops)
-
 	ch <- serverstatsLogDrops.mustNewConstMetric(float64(serverstats.LogDrops))
 	logger.Debug("Serverstats Log Drops", "log_drops", serverstats.LogDrops)
 
-	ch <- serverstatsNTPAuthHits.mustNewConstMetric(float64(serverstats.NTPAuthHits))
-	logger.Debug("Serverstats Authenticated Packets", "auth_hits", serverstats.NTPAuthHits)
+	// Stats added in chrony.ReplyServerStats2
+	switch packet.(type) {
+	case *chrony.ReplyServerStats2, *chrony.ReplyServerStats3, *chrony.ReplyServerStats4:
+		ch <- serverstatsNKEHits.mustNewConstMetric(float64(serverstats.NKEHits))
+		logger.Debug("Serverstats NKE Hits", "nke_hits", serverstats.NKEHits)
+		ch <- serverstatsNKEDrops.mustNewConstMetric(float64(serverstats.NKEDrops))
+		logger.Debug("Serverstats NKE Drops", "nke_drops", serverstats.NKEDrops)
+		ch <- serverstatsNTPAuthHits.mustNewConstMetric(float64(serverstats.NTPAuthHits))
+		logger.Debug("Serverstats Authenticated Packets", "auth_hits", serverstats.NTPAuthHits)
+	}
 
-	ch <- serverstatsNTPInterleavedHits.mustNewConstMetric(float64(serverstats.NTPInterleavedHits))
-	logger.Debug("Serverstats Interleaved Packets", "interleaved_hits", serverstats.NTPInterleavedHits)
+	// Stats added in chrony.ReplyServerStats3
+	switch packet.(type) {
+	case *chrony.ReplyServerStats3, *chrony.ReplyServerStats4:
+		ch <- serverstatsNTPInterleavedHits.mustNewConstMetric(float64(serverstats.NTPInterleavedHits))
+		logger.Debug("Serverstats Interleaved Packets", "interleaved_hits", serverstats.NTPInterleavedHits)
+		ch <- serverstatsNTPTimestamps.mustNewConstMetric(float64(serverstats.NTPTimestamps))
+		logger.Debug("Serverstats Timestamps Held", "ntp_timestamps_held", serverstats.NTPTimestamps)
+		ch <- serverstatsNTPSpanSeconds.mustNewConstMetric(float64(serverstats.NTPSpanSeconds))
+		logger.Debug("Serverstats Timestamps Span", "ntp_timestamps_span", serverstats.NTPSpanSeconds)
+	}
 
-	ch <- serverstatsNTPTimestamps.mustNewConstMetric(float64(serverstats.NTPTimestamps))
-	logger.Debug("Serverstats Timestamps Held", "ntp_timestamps_held", serverstats.NTPTimestamps)
-
-	ch <- serverstatsNTPSpanSeconds.mustNewConstMetric(float64(serverstats.NTPSpanSeconds))
-	logger.Debug("Serverstats Timestamps Span", "ntp_timestamps_span", serverstats.NTPSpanSeconds)
-
-	ch <- serverstatsNTPDaemonRxTimestamps.mustNewConstMetric(float64(serverstats.NTPDaemonRxtimestamps))
-	logger.Debug("Serverstats Daemon Rx Timestamps", "ntp_daemon_rx_timestamps", serverstats.NTPDaemonRxtimestamps)
-
-	ch <- serverstatsNTPDaemonTxTimestamps.mustNewConstMetric(float64(serverstats.NTPDaemonTxtimestamps))
-	logger.Debug("Serverstats Daemon Tx Timestamps", "ntp_daemon_tx_timestamps", serverstats.NTPDaemonTxtimestamps)
-
-	ch <- serverstatsNTPKernelRxTimestamps.mustNewConstMetric(float64(serverstats.NTPKernelRxtimestamps))
-	logger.Debug("Serverstats Kernel Rx Timestamps", "ntp_kernel_rx_timestamps", serverstats.NTPKernelRxtimestamps)
-
-	ch <- serverstatsNTPKernelTxTimestamps.mustNewConstMetric(float64(serverstats.NTPKernelTxtimestamps))
-	logger.Debug("Serverstats Kernel Tx Timestamps", "ntp_kernel_tx_timestamps", serverstats.NTPKernelTxtimestamps)
-
-	ch <- serverstatsNTPHwRxTimestamps.mustNewConstMetric(float64(serverstats.NTPHwRxTimestamps))
-	logger.Debug("Serverstats Hardware Rx Timestamps", "ntp_hw_rx_timestamps", serverstats.NTPHwRxTimestamps)
-
-	ch <- serverstatsNTPHwTxTimestamps.mustNewConstMetric(float64(serverstats.NTPHwTxTimestamps))
-	logger.Debug("Serverstats Hardware Tx Timestamps", "ntp_hw_tx_timestamps", serverstats.NTPHwTxTimestamps)
+	// Stats added in chrony.ReplyServerStats4
+	switch packet.(type) {
+	case *chrony.ReplyServerStats4:
+		ch <- serverstatsNTPDaemonRxTimestamps.mustNewConstMetric(float64(serverstats.NTPDaemonRxtimestamps))
+		logger.Debug("Serverstats Daemon Rx Timestamps", "ntp_daemon_rx_timestamps", serverstats.NTPDaemonRxtimestamps)
+		ch <- serverstatsNTPDaemonTxTimestamps.mustNewConstMetric(float64(serverstats.NTPDaemonTxtimestamps))
+		logger.Debug("Serverstats Daemon Tx Timestamps", "ntp_daemon_tx_timestamps", serverstats.NTPDaemonTxtimestamps)
+		ch <- serverstatsNTPKernelRxTimestamps.mustNewConstMetric(float64(serverstats.NTPKernelRxtimestamps))
+		logger.Debug("Serverstats Kernel Rx Timestamps", "ntp_kernel_rx_timestamps", serverstats.NTPKernelRxtimestamps)
+		ch <- serverstatsNTPKernelTxTimestamps.mustNewConstMetric(float64(serverstats.NTPKernelTxtimestamps))
+		logger.Debug("Serverstats Kernel Tx Timestamps", "ntp_kernel_tx_timestamps", serverstats.NTPKernelTxtimestamps)
+		ch <- serverstatsNTPHwRxTimestamps.mustNewConstMetric(float64(serverstats.NTPHwRxTimestamps))
+		logger.Debug("Serverstats Hardware Rx Timestamps", "ntp_hw_rx_timestamps", serverstats.NTPHwRxTimestamps)
+		ch <- serverstatsNTPHwTxTimestamps.mustNewConstMetric(float64(serverstats.NTPHwTxTimestamps))
+		logger.Debug("Serverstats Hardware Tx Timestamps", "ntp_hw_tx_timestamps", serverstats.NTPHwTxTimestamps)
+	}
 
 	return nil
 }
