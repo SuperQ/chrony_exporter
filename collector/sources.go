@@ -125,7 +125,7 @@ func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Me
 	results := make([]chrony.ReplySourceData, sources.NSources)
 
 	for i := 0; i < int(sources.NSources); i++ {
-		logger.Debug("Fetching source", "source", i)
+		logger.Debug("Fetching source", "source_index", i)
 		packet, err = client.Communicate(chrony.NewSourceDataPacket(int32(i)))
 		if err != nil {
 			return fmt.Errorf("Failed to get sourcedata response: %d", i)
