@@ -108,9 +108,59 @@ var (
 		),
 		prometheus.GaugeValue,
 	}
+
+	sourcesPeerOffset = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, sourcesSubsystem, "peer_offset_seconds"),
+			"Chrony sources peer offset",
+			[]string{"source_address", "source_name"},
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	sourcesPeerDelay = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, sourcesSubsystem, "peer_delay_seconds"),
+			"Chrony sources peer delay",
+			[]string{"source_address", "source_name"},
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	sourcesPeerDispersion = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, sourcesSubsystem, "peer_dispersion_seconds"),
+			"Chrony sources peer dispersion",
+			[]string{"source_address", "source_name"},
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	sourcesPeerResponseTime = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, sourcesSubsystem, "peer_response_time_seconds"),
+			"Chrony sources peer response time",
+			[]string{"source_address", "source_name"},
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	sourcesPeerJitterAsymmetry = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, sourcesSubsystem, "peer_jitter_asymmetry_seconds"),
+			"Chrony sources peer jitter asymmetry",
+			[]string{"source_address", "source_name"},
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
 )
 
-func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Metric, client chrony.Client) error {
+func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Metric, client chrony.Client, collectNtpdata bool) error {
 	packet, err := client.Communicate(chrony.NewSourcesPacket())
 	if err != nil {
 		return err
@@ -157,6 +207,22 @@ func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Me
 		ch <- sourcesPollInterval.mustNewConstMetric(math.Pow(2, float64(r.Poll)), sourceAddress, sourceName)
 		ch <- sourcesStateInfo.mustNewConstMetric(1.0, sourceAddress, sourceName, r.State.String(), r.Mode.String())
 		ch <- sourcesStratum.mustNewConstMetric(float64(r.Stratum), sourceAddress, sourceName)
+
+		if collectNtpdata {
+			ntpDataPacket, err := client.Communicate(chrony.NewNTPDataPacket(r.IPAddr))
+			if err != nil {
+				return fmt.Errorf("Failed to get ntpdata response for: %s", r.IPAddr)
+			}
+			ntpData, ok := ntpDataPacket.(*chrony.ReplyNTPData)
+			if !ok {
+				return fmt.Errorf("Got wrong 'ntpdata' response: %q", packet)
+			}
+			ch <- sourcesPeerOffset.mustNewConstMetric(ntpData.Offset, sourceAddress, sourceName)
+			ch <- sourcesPeerDelay.mustNewConstMetric(ntpData.PeerDelay, sourceAddress, sourceName)
+			ch <- sourcesPeerResponseTime.mustNewConstMetric(ntpData.ResponseTime, sourceAddress, sourceName)
+			ch <- sourcesPeerDispersion.mustNewConstMetric(ntpData.PeerDispersion, sourceAddress, sourceName)
+			ch <- sourcesPeerJitterAsymmetry.mustNewConstMetric(ntpData.JitterAsymmetry, sourceAddress, sourceName)
+		}
 	}
 
 	return nil
