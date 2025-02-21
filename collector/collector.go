@@ -63,6 +63,8 @@ type Exporter struct {
 	logger *slog.Logger
 }
 
+var globalDNSCache = make(map[string]string)
+
 type typedDesc struct {
 	desc      *prometheus.Desc
 	valueType prometheus.ValueType
@@ -193,13 +195,24 @@ func (e Exporter) dnsLookup(logger *slog.Logger, address net.IP) string {
 	if !e.dnsLookups {
 		return address.String()
 	}
-	names, err := net.LookupAddr(address.String())
+	addrStr := address.String()
+
+	if cached, exists := globalDNSCache[addrStr]; exists {
+		return cached
+	}
+	names, err := net.LookupAddr(addrStr)
+
+	var result string
 	if err != nil || len(names) < 1 {
-		return address.String()
+		result = addrStr
+	} else {
+		for i, name := range names {
+			names[i] = strings.TrimRight(name, ".")
+		}
+		sort.Strings(names)
+		result = strings.Join(slices.Compact(names), ",")
 	}
-	for i, name := range names {
-		names[i] = strings.TrimRight(name, ".")
-	}
-	sort.Strings(names)
-	return strings.Join(slices.Compact(names), ",")
+	globalDNSCache[addrStr] = result
+
+	return result
 }
