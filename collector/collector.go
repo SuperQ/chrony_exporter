@@ -55,6 +55,7 @@ type Exporter struct {
 	timeout time.Duration
 
 	collectSources     bool
+	collectNtpdata     bool
 	collectTracking    bool
 	collectServerstats bool
 	chmodSocket        bool
@@ -86,6 +87,8 @@ type ChronyCollectorConfig struct {
 
 	// CollectSources will configure the exporter to collect `chronyc sources`.
 	CollectSources bool
+	// CollectNtpData will configure the exporter to extend sources info with `chronyc ntpdata`
+	CollectNtpdata bool
 	// CollectTracking will configure the exporter to collect `chronyc tracking`.
 	CollectTracking bool
 	// CollectServerstats will configure the exporter to collect `chronyc serverstats`.
@@ -98,6 +101,7 @@ func NewExporter(conf ChronyCollectorConfig, logger *slog.Logger) Exporter {
 		timeout: conf.Timeout,
 
 		collectSources:     conf.CollectSources,
+		collectNtpdata:     conf.CollectNtpdata,
 		collectTracking:    conf.CollectTracking,
 		collectServerstats: conf.CollectServerstats,
 		chmodSocket:        conf.ChmodSocket,
@@ -161,7 +165,7 @@ func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 	client := chrony.Client{Sequence: 1, Connection: conn}
 
 	if e.collectSources {
-		err = e.getSourcesMetrics(logger, ch, client)
+		err = e.getSourcesMetrics(logger, ch, client, e.collectNtpdata)
 		if err != nil {
 			logger.Debug("Couldn't get sources", "err", err)
 			up = 0

@@ -58,6 +58,11 @@ func main() {
 	).Default("false").BoolVar(&conf.CollectSources)
 
 	kingpin.Flag(
+		"collector.sources.with-ntpdata",
+		"Extend sources with ntpdata metrics (requires socket connection)",
+	).Default("false").BoolVar(&conf.CollectNtpdata)
+
+	kingpin.Flag(
 		"collector.serverstats",
 		"Collect serverstats metrics",
 	).Default("false").BoolVar(&conf.CollectServerstats)
