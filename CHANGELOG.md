@@ -1,5 +1,10 @@
 ## main / unreleased
 
+## 0.12.0 / 2025-03-02
+
+* [FEATURE] Optionally enhance "sources" information with NtpData response #106
+* [BUGFIX] Fix debug logging panic #108
+
 ## 0.11.0 / 2024-10-27
 
 * [CHANGE] Update logging to slog #95
