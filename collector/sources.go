@@ -213,10 +213,17 @@ func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Me
 			if err != nil {
 				return fmt.Errorf("Failed to get ntpdata response for: %s", r.IPAddr)
 			}
-			ntpData, ok := ntpDataPacket.(*chrony.ReplyNTPData)
-			if !ok {
+
+			var ntpData *chrony.NTPData
+			switch rpyNTPData := ntpDataPacket.(type) {
+			case *chrony.ReplyNTPData:
+				ntpData = &rpyNTPData.NTPData
+			case *chrony.ReplyNTPData2:
+				ntpData = &rpyNTPData.NTPData
+			default:
 				return fmt.Errorf("Got wrong 'ntpdata' response: %q", packet)
 			}
+
 			ch <- sourcesPeerOffset.mustNewConstMetric(ntpData.Offset, sourceAddress, sourceName)
 			ch <- sourcesPeerDelay.mustNewConstMetric(ntpData.PeerDelay, sourceAddress, sourceName)
 			ch <- sourcesPeerResponseTime.mustNewConstMetric(ntpData.ResponseTime, sourceAddress, sourceName)
