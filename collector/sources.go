@@ -169,7 +169,7 @@ func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Me
 
 	sources, ok := packet.(*chrony.ReplySources)
 	if !ok {
-		return fmt.Errorf("Got wrong 'sources' response: %q", packet)
+		return fmt.Errorf("got wrong 'sources' response: %q", packet)
 	}
 
 	results := make([]chrony.ReplySourceData, sources.NSources)
@@ -178,11 +178,11 @@ func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Me
 		logger.Debug("Fetching source", "source_index", i)
 		packet, err = client.Communicate(chrony.NewSourceDataPacket(int32(i)))
 		if err != nil {
-			return fmt.Errorf("Failed to get sourcedata response: %d", i)
+			return fmt.Errorf("failed to get sourcedata response: %d", i)
 		}
 		sourceData, ok := packet.(*chrony.ReplySourceData)
 		if !ok {
-			return fmt.Errorf("Got wrong 'sourcedata' response: %q", packet)
+			return fmt.Errorf("got wrong 'sourcedata' response: %q", packet)
 		}
 		results[i] = *sourceData
 	}
@@ -211,7 +211,7 @@ func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Me
 		if collectNtpdata {
 			ntpDataPacket, err := client.Communicate(chrony.NewNTPDataPacket(r.IPAddr))
 			if err != nil {
-				return fmt.Errorf("Failed to get ntpdata response for: %s", r.IPAddr)
+				return fmt.Errorf("failed to get ntpdata response for: %s", r.IPAddr)
 			}
 
 			var ntpData *chrony.NTPData
@@ -221,7 +221,7 @@ func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Me
 			case *chrony.ReplyNTPData2:
 				ntpData = &rpyNTPData.NTPData
 			default:
-				return fmt.Errorf("Got wrong 'ntpdata' response: %q", packet)
+				return fmt.Errorf("got wrong 'ntpdata' response: %q", packet)
 			}
 
 			ch <- sourcesPeerOffset.mustNewConstMetric(ntpData.Offset, sourceAddress, sourceName)
