@@ -244,7 +244,7 @@ func (e Exporter) getServerstatsMetrics(logger *slog.Logger, ch chan<- prometheu
 
 	serverstats, err := parseServerStatsPacket(packet)
 	if err != nil {
-		return fmt.Errorf("Unable to parse 'serverstats' packet: %w", err)
+		return fmt.Errorf("unable to parse 'serverstats' packet: %w", err)
 	}
 
 	// Stats that only exist in all versions.
