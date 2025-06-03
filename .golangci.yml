@@ -5,9 +5,6 @@ linters:
     - revive
     - sloglint
   settings:
-    errcheck:
-      exclude-functions:
-        - (net/http.ResponseWriter).Write
     revive:
       rules:
         - name: unused-parameter
