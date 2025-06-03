@@ -1,5 +1,10 @@
 ## main / unreleased
 
+## 0.12.1 / 2025-06-03
+
+* [BUGFIX] Fix socket client filename #121
+* [BUGFIX] Fix collector.sources.with-ntpdata for chrony >= 4.6 #119)
+
 ## 0.12.0 / 2025-03-02
 
 * [FEATURE] Optionally enhance "sources" information with NtpData response #106
