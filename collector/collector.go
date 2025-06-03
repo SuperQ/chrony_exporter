@@ -26,6 +26,8 @@ import (
 	"time"
 
 	"github.com/facebook/time/ntp/chrony"
+	"github.com/google/uuid"
+
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -119,7 +121,7 @@ func (e Exporter) dial() (net.Conn, func(), error) {
 	if strings.HasPrefix(e.address, "unix://") {
 		remote := strings.TrimPrefix(e.address, "unix://")
 		base, _ := path.Split(remote)
-		local := path.Join(base, fmt.Sprintf("chrony_exporter.%d.sock", os.Getpid()))
+		local := path.Join(base, fmt.Sprintf("chrony_exporter.%s.sock", uuid.New()))
 		conn, err := net.DialUnix("unixgram",
 			&net.UnixAddr{Name: local, Net: "unixgram"},
 			&net.UnixAddr{Name: remote, Net: "unixgram"},
