@@ -70,14 +70,14 @@ Flags:
                                  do reverse DNS lookups
       --web.telemetry-path="/metrics"  
                                  Path under which to expose metrics.
-      --[no-]web.systemd-socket  Use systemd socket activation listeners instead of port listeners (Linux only).
+      --[no-]web.disable-exporter-metrics  
+                                 Exclude metrics about the exporter itself (promhttp_*, process_*, go_*).
       --web.listen-address=:9123 ...  
                                  Addresses on which to expose metrics and web interface. Repeatable for multiple
-                                 addresses.
+                                 addresses. Examples: `:9100` or `[::1]:9100` for http, `vsock://:9100` for vsock
       --web.config.file=""       Path to configuration file that can enable TLS or authentication. See:
                                  https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-configuration.md
-      --log.level=info           Only log messages with the given severity or above. One of: [debug, info, warn,
-                                 error]
+      --log.level=info           Only log messages with the given severity or above. One of: [debug, info, warn,  error]
       --log.format=logfmt        Output format of log messages. One of: [logfmt, json]
       --[no-]version             Show application version.
 ```

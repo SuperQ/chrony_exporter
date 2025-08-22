@@ -81,6 +81,11 @@ func main() {
 		"Path under which to expose metrics.",
 	).Default("/metrics").String()
 
+	disableExporterMetrics := kingpin.Flag(
+		"web.disable-exporter-metrics",
+		"Exclude metrics about the exporter itself (promhttp_*, process_*, go_*).",
+	).Bool()
+
 	toolkitFlags := kingpinflag.AddFlags(kingpin.CommandLine, ":9123")
 
 	promslogConfig := &promslog.Config{}
@@ -97,7 +102,12 @@ func main() {
 	exporter := collector.NewExporter(conf, logger)
 	prometheus.MustRegister(exporter)
 
-	http.Handle(*metricsPath, promhttp.Handler())
+	handler := promhttp.HandlerFor(prometheus.DefaultGatherer, promhttp.HandlerOpts{})
+	if !*disableExporterMetrics {
+		handler = promhttp.InstrumentMetricHandler(prometheus.DefaultRegisterer, handler)
+	}
+
+	http.Handle(*metricsPath, handler)
 	if *metricsPath != "/" && *metricsPath != "" {
 		landingConfig := web.LandingConfig{
 			Name:        "Chrony Exporter",
