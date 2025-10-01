@@ -1,5 +1,9 @@
 ## main / unreleased
 
+## 0.12.2 / 2025-10-01
+
+* [BUGFIX] Bump modules #131
+
 ## 0.12.1 / 2025-06-03
 
 * [BUGFIX] Fix socket client filename #121
