@@ -118,8 +118,7 @@ func (e Exporter) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (e Exporter) dial() (net.Conn, func(), error) {
-	if strings.HasPrefix(e.address, "unix://") {
-		remote := strings.TrimPrefix(e.address, "unix://")
+	if remote, ok := strings.CutPrefix(e.address, "unix://"); ok {
 		base, _ := path.Split(remote)
 		local := path.Join(base, fmt.Sprintf("chrony_exporter.%s.sock", uuid.New()))
 		conn, err := net.DialUnix("unixgram",
