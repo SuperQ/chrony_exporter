@@ -188,11 +188,15 @@ func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Me
 	}
 
 	for _, r := range results {
+		if r.IPAddr.Family == chrony.IPAddrID {
+			logger.Debug("Skipping unresolved IP address", "address", r.IPAddr.String())
+			continue
+		}
 		sourceAddress := r.IPAddr.String()
-		sourceName := e.dnsLookup(logger, r.IPAddr)
+		sourceName := e.dnsLookup(logger, r.IPAddr.ToNetIP())
 
-		if r.Mode == chrony.SourceModeRef && r.IPAddr.To4() != nil {
-			sourceName = chrony.RefidToString(binary.BigEndian.Uint32(r.IPAddr))
+		if r.Mode == chrony.SourceModeRef && r.IPAddr.ToNetIP().To4() != nil {
+			sourceName = chrony.RefidToString(binary.BigEndian.Uint32(r.IPAddr.ToNetIP().To4()))
 		}
 
 		// Compute the reachability from the Reachability bits.
