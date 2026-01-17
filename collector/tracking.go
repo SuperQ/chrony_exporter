@@ -168,7 +168,7 @@ func (e Exporter) trackingFormatName(logger *slog.Logger, tracking chrony.Tracki
 	return e.dnsLookup(logger, tracking.IPAddr)
 }
 
-func (e Exporter) getTrackingMetrics(logger *slog.Logger, ch chan<- prometheus.Metric, client chrony.Client) error {
+func (e Exporter) getTrackingMetrics(logger *slog.Logger, ch chan<- prometheus.Metric, client *chrony.Client) error {
 	packet, err := client.Communicate(chrony.NewTrackingPacket())
 	if err != nil {
 		return err

@@ -166,7 +166,7 @@ func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 	client := chrony.Client{Sequence: 1, Connection: conn}
 
 	if e.collectSources {
-		err = e.getSourcesMetrics(logger, ch, client, e.collectNtpdata)
+		err = e.getSourcesMetrics(logger, ch, &client, e.collectNtpdata)
 		if err != nil {
 			logger.Debug("Couldn't get sources", "err", err)
 			up = 0
@@ -174,7 +174,7 @@ func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	if e.collectTracking {
-		err = e.getTrackingMetrics(logger, ch, client)
+		err = e.getTrackingMetrics(logger, ch, &client)
 		if err != nil {
 			logger.Debug("Couldn't get tracking", "err", err)
 			up = 0
@@ -182,7 +182,7 @@ func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	if e.collectServerstats {
-		err = e.getServerstatsMetrics(logger, ch, client)
+		err = e.getServerstatsMetrics(logger, ch, &client)
 		if err != nil {
 			logger.Debug("Couldn't get serverstats", "err", err)
 			up = 0

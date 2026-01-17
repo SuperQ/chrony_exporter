@@ -160,7 +160,7 @@ var (
 	}
 )
 
-func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Metric, client chrony.Client, collectNtpdata bool) error {
+func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Metric, client *chrony.Client, collectNtpdata bool) error {
 	packet, err := client.Communicate(chrony.NewSourcesPacket())
 	if err != nil {
 		return err
