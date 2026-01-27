@@ -1,5 +1,10 @@
 ## main / unreleased
 
+## 0.12.3 / 2026-01-27
+
+* [BUGFIX] Skip chrony IPADDR_ID sources #141
+* [BUGFIX] Fix reference clock source handling #142
+
 ## 0.12.2 / 2025-10-01
 
 * [BUGFIX] Bump modules #131
