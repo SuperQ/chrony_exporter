@@ -196,7 +196,9 @@ func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Me
 		sourceName := e.dnsLookup(logger, r.IPAddr.ToNetIP())
 
 		if r.Mode == chrony.SourceModeRef && r.IPAddr.ToNetIP().To4() != nil {
-			sourceName = chrony.RefidToString(binary.BigEndian.Uint32(r.IPAddr.ToNetIP().To4()))
+			refid := chrony.RefidToString(binary.BigEndian.Uint32(r.IPAddr.ToNetIP().To4()))
+			sourceAddress = refid
+			sourceName = refid
 		}
 
 		// Compute the reachability from the Reachability bits.
@@ -212,7 +214,8 @@ func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Me
 		ch <- sourcesStateInfo.mustNewConstMetric(1.0, sourceAddress, sourceName, r.State.String(), r.Mode.String())
 		ch <- sourcesStratum.mustNewConstMetric(float64(r.Stratum), sourceAddress, sourceName)
 
-		if collectNtpdata {
+		// Skip NTP data collection for reference clocks as they don't have NTP protocol data
+		if collectNtpdata && r.Mode != chrony.SourceModeRef {
 			ntpDataPacket, err := client.Communicate(chrony.NewNTPDataPacket(r.IPAddr))
 			if err != nil {
 				return fmt.Errorf("failed to get ntpdata response for: %s", r.IPAddr)
