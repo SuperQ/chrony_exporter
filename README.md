@@ -56,8 +56,8 @@ usage: chrony_exporter [<flags>]
 Flags:
   -h, --[no-]help                Show context-sensitive help (also try --help-long and --help-man).
       --chrony.address="[::1]:323"  
-                                 Address of the Chrony srever.
-      --chrony.timeout=5s        Timeout on requests to the Chrony srever.
+                                 Address of the Chrony server.
+      --chrony.timeout=5s        Timeout on requests to the Chrony server.
       --[no-]collector.tracking  Collect tracking metrics
       --[no-]collector.sources   Collect sources metrics
       --[no-]collector.sources.with-ntpdata  
