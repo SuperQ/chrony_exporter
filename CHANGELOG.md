@@ -1,5 +1,9 @@
 ## main / unreleased
 
+## 0.13.0 / 2026-02-24
+
+* [FEATURE] Export sourcestats metrics #148
+
 ## 0.12.3 / 2026-01-27
 
 * [BUGFIX] Skip chrony IPADDR_ID sources #141
