@@ -39,12 +39,12 @@ var (
 func main() {
 	kingpin.Flag(
 		"chrony.address",
-		"Address of the Chrony srever.",
+		"Address of the Chrony server.",
 	).Default("[::1]:323").StringVar(&conf.Address)
 
 	kingpin.Flag(
 		"chrony.timeout",
-		"Timeout on requests to the Chrony srever.",
+		"Timeout on requests to the Chrony server.",
 	).Default("5s").DurationVar(&conf.Timeout)
 
 	kingpin.Flag(
@@ -56,6 +56,11 @@ func main() {
 		"collector.sources",
 		"Collect sources metrics",
 	).Default("false").BoolVar(&conf.CollectSources)
+
+	kingpin.Flag(
+		"collector.sourcestats",
+		"Collect sourcestats metrics",
+	).Default("false").BoolVar(&conf.CollectSourcestats)
 
 	kingpin.Flag(
 		"collector.sources.with-ntpdata",
