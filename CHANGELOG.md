@@ -1,5 +1,9 @@
 ## main / unreleased
 
+## 0.13.1 / 2026-02-25
+
+* [BUGFIX] sourcestats: Fix for nil report #154
+
 ## 0.13.0 / 2026-02-24
 
 * [FEATURE] Export sourcestats metrics #148
