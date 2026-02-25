@@ -125,6 +125,10 @@ func (e Exporter) getSourcestatsMetrics(logger *slog.Logger, ch chan<- prometheu
 	}
 
 	for _, r := range results {
+		if r.IPAddr == nil {
+			logger.Debug("Skipping source with nil IP address")
+			continue
+		}
 		sourceAddress := r.IPAddr.String()
 		sourceName := e.dnsLookup(logger, r.IPAddr)
 
