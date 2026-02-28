@@ -1,5 +1,9 @@
 ## main / unreleased
 
+## 0.13.2 / 2026-02-28
+
+* [BUGFIX] Fix sourcestats RefID display #157
+
 ## 0.13.1 / 2026-02-25
 
 * [BUGFIX] sourcestats: Fix for nil report #154
