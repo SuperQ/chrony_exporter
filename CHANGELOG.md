@@ -1,5 +1,9 @@
 ## main / unreleased
 
+## 0.13.3 / 2026-03-01
+
+* [BUGFIX] Fix tracking RefID names #161
+
 ## 0.13.2 / 2026-02-28
 
 * [BUGFIX] Fix sourcestats RefID display #157
