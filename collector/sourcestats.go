@@ -125,18 +125,17 @@ func (e Exporter) getSourcestatsMetrics(logger *slog.Logger, ch chan<- prometheu
 	}
 
 	for _, r := range results {
-		sourceAddress := ""
+		if r.IPAddr.Family == chrony.IPAddrUnspec {
+			logger.Debug("Skipping unresolved IP address", "address", r.IPAddr.String())
+			continue
+		}
+		sourceAddress := r.IPAddr.String()
 		sourceName := ""
-		if r.IPAddr != nil {
-			sourceAddress = r.IPAddr.String()
-			sourceName = e.dnsLookup(logger, r.IPAddr)
+		if r.IPAddr.Family == chrony.IPAddrID {
+			// If the chrony.IPAddr.Family is an IPAddrID we just copy the sourceAddress string.
+			sourceName = sourceAddress
 		} else {
-			// Currently the library calls `ToNetIP()` which returns nil
-			// if the IP family is unspecified. This likely means that the
-			// sources result is a RefID.
-			refid := chrony.RefidToString(r.RefID)
-			sourceAddress = refid
-			sourceName = refid
+			sourceName = e.dnsLookup(logger, r.IPAddr.ToNetIP())
 		}
 
 		ch <- sourcestatsNSamples.mustNewConstMetric(float64(r.NSamples), sourceAddress, sourceName)
