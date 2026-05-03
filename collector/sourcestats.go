@@ -102,11 +102,11 @@ func (e Exporter) getSourcestatsMetrics(logger *slog.Logger, ch chan<- prometheu
 	if err != nil {
 		return err
 	}
-	logger.Debug("Got 'sources' response", "sources_packet", packet.GetStatus())
+	logger.Debug("Got 'sourcestats' response", "sourcestats_status", packet.GetStatus())
 
 	sources, ok := packet.(*chrony.ReplySources)
 	if !ok {
-		return fmt.Errorf("got wrong 'sources' response: %q", packet)
+		return fmt.Errorf("got wrong 'sourcestats' response: %q", packet)
 	}
 
 	results := make([]chrony.ReplySourceStats, sources.NSources)
@@ -121,6 +121,7 @@ func (e Exporter) getSourcestatsMetrics(logger *slog.Logger, ch chan<- prometheu
 		if !ok {
 			return fmt.Errorf("got wrong 'sourcestats' response: %q", packet)
 		}
+		logger.Debug("Got sourcestats", "source_index", i, "source_stats", sourceStats)
 		results[i] = *sourceStats
 	}
 
