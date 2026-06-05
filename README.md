@@ -66,6 +66,7 @@ Flags:
                                  Extend sources with ntpdata metrics (requires socket connection)
       --[no-]collector.serverstats  
                                  Collect serverstats metrics
+      --[no-]collector.clients   Collect clients metrics
       --[no-]collector.chmod-socket  
                                  Chmod 0666 the receiving unix datagram socket
       --[no-]collector.dns-lookups  
@@ -92,6 +93,33 @@ In case chrony is configured to not accept command messages via UDP (`cmdport 0`
 In this case use the command line option `--chrony.address=unix:///path/to/chronyd.sock` to configure the path to the chrony command socket.
 On most systems chrony will be listenting on `unix:///run/chrony/chronyd.sock`. For this to work the exporter needs to run as root or the same user as chrony.
 When the exporter is run as root the flag `collector.chmod-socket` is needed as well.
+
+### Clients collector
+
+`--collector.clients` exports aggregate metrics from chronyd's client log, the
+same data shown by `chronyc clients`. The metrics have no per-client labels, so
+the number of series stays the same no matter how many clients connect.
+
+This needs chrony 4.0 or later. The command it uses reports NTS-KE statistics,
+which chronyd only gained with NTS support in 4.0. Older versions do not know
+the command and reject the request, so the scrape sets `chrony_up` to 0.
+
+These metrics are not the same as the serverstats ones. The serverstats
+counters are chronyd's own totals since startup and only go up, so use those
+for long-term request rates. The clients hit and drop metrics are gauges, not
+counters: they are a live sum over the clients in the log, so they rise as
+clients are seen and fall again as old records are dropped. They are most
+useful for the connected count and the last-seen and interval histograms.
+
+The client log size is set by
+[`clientloglimit`](https://chrony-project.org/doc/4.5/chrony.conf.html#clientloglimit)
+in `chrony.conf`. This is a limit in bytes, 512 KiB by default, which chronyd
+uses to hold a power-of-two number of records, around 4096 with the default.
+When the log is full chronyd reuses the oldest records, so
+`chrony_clients_connected` stops at that limit and the hit and drop gauges can
+go down as clients are dropped. Increase `clientloglimit` to track more
+clients, but note that it is real memory (up to 2 GB), so set it to match the
+number of clients you expect.
 
 ## Prometheus Rules
 
