@@ -4,7 +4,18 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    groups:
+      promci:
+        patterns:
+          - "prometheus/promci*"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "monthly"
+    # Exclude configs synced from upstream prometheus/prometheus.
+    exclude-paths:
+      - .github/workflows/container_description.yml
+      - .github/workflows/golangci-lint.yml
+      - .github/workflows/govulncheck.yml
+      - .github/workflows/scorecards.yml
+      - .github/workflows/stale.yml
