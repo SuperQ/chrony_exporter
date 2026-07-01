@@ -7,7 +7,7 @@ require (
 	github.com/facebook/time v0.0.0-20260325194334-c70c13bedb97
 	github.com/google/uuid v1.6.0
 	github.com/prometheus/client_golang v1.23.2
-	github.com/prometheus/common v0.68.0
+	github.com/prometheus/common v0.69.0
 	github.com/prometheus/exporter-toolkit v0.17.0
 )
 
