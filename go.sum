@@ -11,8 +11,8 @@ github.com/coreos/go-systemd/v22 v22.7.0/go.mod h1:xNUYtjHu2EDXbsxz1i41wouACIwT7
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/facebook/time v0.0.0-20260325194334-c70c13bedb97 h1:wwKhJEBXoHoy0zHiGDUZly56y98Bl+c+UeBVmRXaAnM=
-github.com/facebook/time v0.0.0-20260325194334-c70c13bedb97/go.mod h1:98ab4DtT6gMljAQ6j1cO+68lnB8XfpGKVZtL9FQvsTs=
+github.com/facebook/time v0.0.0-20260604194729-8522b1637c7e h1:d1JXzURUpsXcf2pmE3BZVbG7e+eZcvRQSLHZqoQtYmc=
+github.com/facebook/time v0.0.0-20260604194729-8522b1637c7e/go.mod h1:sbXd8MxicNxCm6DrrrswkNzXkkXcqP5080oMWmnPFKY=
 github.com/golang-jwt/jwt/v5 v5.3.1 h1:kYf81DTWFe7t+1VvL7eS+jKFVWaUnK9cB1qbwn63YCY=
 github.com/golang-jwt/jwt/v5 v5.3.1/go.mod h1:fxCRLWMO43lRc8nhHWY6LGqRcf+1gQWArsqaEUEa5bE=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
