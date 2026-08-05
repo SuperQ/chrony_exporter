@@ -14,6 +14,7 @@
 package collector
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net"
@@ -137,15 +138,21 @@ func (e Exporter) dial() (net.Conn, func(), error) {
 				return nil, func() { conn.Close(); os.Remove(local) }, err
 			}
 		}
-		err = conn.SetReadDeadline(time.Now().Add(e.timeout))
+		err = conn.SetDeadline(time.Now().Add(e.timeout))
 		if err != nil {
-			e.logger.Debug("Couldn't set read-timeout for unix datagram socket", "err", err)
+			e.logger.Debug("Couldn't set timeout for socket", "network", "unixgram", "err", err)
 		}
 		return conn, func() { conn.Close(); os.Remove(local) }, nil
 	}
 
 	conn, err := net.DialTimeout("udp", e.address, e.timeout)
-	return conn, func() {}, err
+	if err != nil {
+		return nil, func() {}, err
+	}
+	if err := conn.SetDeadline(time.Now().Add(e.timeout)); err != nil {
+		e.logger.Debug("Couldn't set timeout for socket", "network", "udp", "err", err)
+	}
+	return conn, func() { conn.Close() }, nil
 }
 
 // Collect implements prometheus.Collector.
@@ -210,7 +217,9 @@ func (e Exporter) dnsLookup(logger *slog.Logger, address net.IP) string {
 	if !e.dnsLookups {
 		return address.String()
 	}
-	names, err := net.LookupAddr(address.String())
+	ctx, cancel := context.WithTimeout(context.Background(), e.timeout)
+	defer cancel()
+	names, err := net.DefaultResolver.LookupAddr(ctx, address.String())
 	if err != nil || len(names) < 1 {
 		return address.String()
 	}
