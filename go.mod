@@ -6,6 +6,7 @@ require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/facebook/time v0.0.0-20260604194729-8522b1637c7e
 	github.com/google/uuid v1.6.0
+	github.com/miekg/dns v1.1.73
 	github.com/prometheus/client_golang v1.24.1
 	github.com/prometheus/common v0.70.1
 	github.com/prometheus/exporter-toolkit v0.17.1

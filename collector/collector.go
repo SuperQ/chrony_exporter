@@ -19,8 +19,6 @@ import (
 	"net"
 	"os"
 	"path"
-	"slices"
-	"sort"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -64,6 +62,10 @@ type Exporter struct {
 	collectClients     bool
 	chmodSocket        bool
 	dnsLookups         bool
+	resolver           *reverseResolver
+	systemLookup       func(address string) (string, error)
+	dnsCache           *dnsCache
+	pathologyWarner    *pathologyWarner
 
 	logger *slog.Logger
 }
@@ -88,6 +90,10 @@ type ChronyCollectorConfig struct {
 	ChmodSocket bool
 	// DNSLookups will reverse resolve IP addresses to names when true.
 	DNSLookups bool
+	// DNSPTRCacheMinTTL sets the floor for how long a reverse DNS lookup is
+	// cached, raising short/absent record TTLs up to at least this long. A
+	// time.Duration (ms, s, m, h) - not just seconds.
+	DNSPTRCacheMinTTL time.Duration
 
 	// CollectSources will configure the exporter to collect `chronyc sources`.
 	CollectSources bool
@@ -104,6 +110,19 @@ type ChronyCollectorConfig struct {
 }
 
 func NewExporter(conf ChronyCollectorConfig, logger *slog.Logger) Exporter {
+	var resolver *reverseResolver
+	var systemLookup func(string) (string, error)
+	if conf.DNSLookups {
+		var err error
+		resolver, err = newReverseResolver()
+		if err != nil {
+			logger.Warn("failed to load resolver config: direct DNS queries for record TTLs are disabled; "+
+				"reverse lookups will use --collector.dns-ptr-cache-min-ttl (default 0s) as a fixed cache duration instead of a real TTL",
+				"err", err)
+		}
+		systemLookup = systemReverseLookup
+	}
+
 	return Exporter{
 		address: conf.Address,
 		timeout: conf.Timeout,
@@ -116,6 +135,10 @@ func NewExporter(conf ChronyCollectorConfig, logger *slog.Logger) Exporter {
 		collectClients:     conf.CollectClients,
 		chmodSocket:        conf.ChmodSocket,
 		dnsLookups:         conf.DNSLookups,
+		resolver:           resolver,
+		systemLookup:       systemLookup,
+		dnsCache:           newDNSCache(conf.DNSPTRCacheMinTTL),
+		pathologyWarner:    newPathologyWarner(),
 
 		logger: logger,
 	}
@@ -214,21 +237,68 @@ func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 	}
 }
 
+// dnsLookup resolves address via two resolvers behind a cache:
+// systemLookup, the name authority, and e.resolver, which exists only to
+// supply a TTL net.LookupAddr can't. e.resolver's TTL is trusted only on
+// namesAgree with systemLookup's answer; otherwise the configured floor
+// applies. Both run at most once per cache entry, not per scrape.
 func (e Exporter) dnsLookup(logger *slog.Logger, address net.IP) string {
-	start := time.Now()
-	defer func() {
-		logger.Debug("DNS lookup took", "seconds", time.Since(start).Seconds())
-	}()
 	if !e.dnsLookups {
 		return address.String()
 	}
-	names, err := net.LookupAddr(address.String())
-	if err != nil || len(names) < 1 {
-		return address.String()
-	}
-	for i, name := range names {
-		names[i] = strings.TrimRight(name, ".")
-	}
-	sort.Strings(names)
-	return strings.Join(slices.Compact(names), ",")
+	addr := address.String()
+
+	return e.dnsCache.lookup(addr, func() (string, time.Duration) {
+		start := time.Now()
+		defer func() {
+			logger.Debug("DNS lookup took", "seconds", time.Since(start).Seconds())
+		}()
+
+		var dnsName string
+		var ttl time.Duration
+		if e.resolver != nil {
+			name, recordTTL, err := e.resolver.lookup(addr)
+			// ttl may be a negative-cache TTL even on error; 0 means no
+			// usable TTL at all (hard failure, not a real negative answer).
+			ttl = recordTTL
+			if err != nil {
+				logger.Debug("direct DNS lookup failed", "address", addr, "err", err)
+			} else {
+				dnsName = name
+			}
+		}
+
+		sysName, sysErr := e.systemLookup(addr)
+		if sysErr != nil {
+			logger.Debug("system reverse lookup failed", "address", addr, "err", sysErr)
+		}
+
+		switch {
+		case sysErr == nil && namesAgree(sysName, dnsName):
+			return sysName, ttl
+		case sysErr == nil:
+			// ttl describes dnsName's record, not sysName's - don't reuse it.
+			if dnsName != "" {
+				logger.Debug("system resolver disagrees with direct DNS lookup, using the system's answer without the DNS record's TTL",
+					"address", addr, "dns_name", dnsName, "system_name", sysName)
+				e.pathologyWarner.warnOnce("mismatch:"+addr, func() {
+					logger.Warn("pathological reverse DNS lookup: system resolver and direct DNS query keep disagreeing, "+
+						"falling back to the configured min-ttl floor for this address (once-per-process notice)",
+						"address", addr, "dns_name", dnsName, "system_name", sysName, "min_ttl_floor", e.dnsCache.minTTL)
+				})
+			}
+			return sysName, 0
+		default:
+			// systemLookup has nothing; dnsName is never surfaced here (see
+			// doc comment above). ttl still paces retries when non-zero.
+			if ttl == 0 {
+				e.pathologyWarner.warnOnce("no-ttl:"+addr, func() {
+					logger.Warn("pathological reverse DNS lookup: neither resolver could resolve this address and DNS gave no "+
+						"usable TTL, falling back to the configured min-ttl floor (once-per-process notice)",
+						"address", addr, "min_ttl_floor", e.dnsCache.minTTL)
+				})
+			}
+			return addr, ttl
+		}
+	})
 }

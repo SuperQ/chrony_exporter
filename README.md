@@ -71,6 +71,10 @@ Flags:
                                  Chmod 0666 the receiving unix datagram socket
       --[no-]collector.dns-lookups  
                                  do reverse DNS lookups
+      --collector.dns-ptr-cache-min-ttl=0s  
+                                 minimum time to cache a reverse DNS lookup;
+                                 raises short/absent record TTLs to at least
+                                 this. 0 (default) honors the record's own TTL
       --web.telemetry-path="/metrics"  
                                  Path under which to expose metrics.
       --[no-]web.systemd-socket  Use systemd socket activation listeners instead of port listeners (Linux only).
@@ -93,6 +97,47 @@ In case chrony is configured to not accept command messages via UDP (`cmdport 0`
 In this case use the command line option `--chrony.address=unix:///path/to/chronyd.sock` to configure the path to the chrony command socket.
 On most systems chrony will be listenting on `unix:///run/chrony/chronyd.sock`. For this to work the exporter needs to run as root or the same user as chrony.
 When the exporter is run as root the flag `collector.chmod-socket` is needed as well.
+
+### Reverse DNS lookups
+
+`--collector.dns-lookups` resolves source addresses to names using two
+resolvers: the system's own (`/etc/hosts`, DNS, mDNS, NIS, LDAP - whatever
+`/etc/nsswitch.conf` or the platform equivalent configures), and a direct
+DNS query.
+
+The system resolver is the sole authority on the returned name, even when
+it disagrees with the direct DNS query. If it fails, the raw address is
+returned - the direct DNS query's name is never shown, even if it found
+one. Presenting a name from bypassing the system's own resolution path
+would treat DNS as authoritative for a host that may not configure it
+that way (e.g. `dns` deliberately excluded from `nsswitch.conf`). The
+direct DNS query exists only to supply a record TTL, which Go's standard
+resolver doesn't expose.
+
+Results are cached for that TTL by default
+(`--collector.dns-ptr-cache-min-ttl` raises the floor, see above) - but
+only when the two answers agree: an "agree" doesn't need an exact match,
+since PTR has no alias concept and a system answer may legitimately carry
+an extra `/etc/hosts`-style alias DNS doesn't know about; it just needs
+every name DNS reported to also be one the system reported. On a genuine
+disagreement, or when the system resolver fails outright, the cache falls
+back to the configured floor instead (the DNS TTL is still used to pace
+retries in the fails-outright case, just doesn't make the name eligible to
+be returned). Both resolvers run at most once per cache entry, not per
+scrape.
+
+An address with no PTR record at all (common for public NTP pool/anycast
+servers) is cached too: an authoritative NXDOMAIN or NODATA answer's own
+[RFC 2308](https://www.rfc-editor.org/rfc/rfc2308) negative cache TTL
+(from its SOA record) is honored the same way a positive TTL is.
+
+Two situations leave no usable TTL - re-queried at the floor every scrape
+- and each logs a one-time `WARN` the first time it's seen, for the life
+of the process (not gated by the floor, since a real TTL is exactly
+what's missing):
+
+* The system resolver and direct DNS query keep disagreeing.
+* Neither resolver produces a name, and DNS gave no usable TTL either.
 
 ### Clients collector
 

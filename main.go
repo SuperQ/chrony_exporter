@@ -86,6 +86,11 @@ func main() {
 		"collector.dns-lookups", "do reverse DNS lookups",
 	).Default("true").BoolVar(&conf.DNSLookups)
 
+	kingpin.Flag(
+		"collector.dns-ptr-cache-min-ttl",
+		"minimum time to cache a reverse DNS lookup; raises short/absent record TTLs to at least this. 0 (default) honors the record's own TTL",
+	).Default("0s").DurationVar(&conf.DNSPTRCacheMinTTL)
+
 	metricsPath := kingpin.Flag(
 		"web.telemetry-path",
 		"Path under which to expose metrics.",

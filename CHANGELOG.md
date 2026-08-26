@@ -1,5 +1,7 @@
 ## main / unreleased
 
+* [ENHANCEMENT] Reverse DNS lookups are now cached instead of re-resolving every scrape, using each record's real TTL - or an RFC 2308 negative cache TTL when there's no PTR record - via a new direct DNS query added solely to read TTLs, which `net.LookupAddr` doesn't expose. `--collector.dns-ptr-cache-min-ttl` optionally floors the cache duration when no usable TTL is available, and that case now also logs a one-time warning naming the address. The system's own configured resolution order still decides the returned name exactly as before: the new direct query only ever supplies a TTL, tolerating an `/etc/hosts`-style alias it has no concept of, and never overriding the system's answer
+
 ## 0.14.0 / 2026-08-12
 
 * [FEATURE] Add clients collector #181
