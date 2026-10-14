@@ -122,7 +122,7 @@ func NewExporter(conf ChronyCollectorConfig, logger *slog.Logger) Exporter {
 }
 
 // Describe implements prometheus.Collector.
-func (e Exporter) Describe(ch chan<- *prometheus.Desc) {
+func (e Exporter) Describe(_ chan<- *prometheus.Desc) {
 }
 
 func (e Exporter) dial() (net.Conn, func(), error) {
@@ -137,7 +137,7 @@ func (e Exporter) dial() (net.Conn, func(), error) {
 			return nil, func() { os.Remove(local) }, err
 		}
 		if e.chmodSocket {
-			if err := os.Chmod(local, 0666); err != nil {
+			if err := os.Chmod(local, 0o666); err != nil {
 				return nil, func() { conn.Close(); os.Remove(local) }, err
 			}
 		}
