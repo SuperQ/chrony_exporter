@@ -62,7 +62,17 @@ var (
 	sourcesLastSample = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, sourcesSubsystem, "last_sample_offset_seconds"),
-			"Chrony sources last sample offset in seconds",
+			"Chrony sources last sample offset (adjusted) in seconds",
+			[]string{"source_address", "source_name"},
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
+	sourcesLastSampleRaw = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, sourcesSubsystem, "last_sample_raw_offset_seconds"),
+			"Chrony sources last sample offset (measured) in seconds",
 			[]string{"source_address", "source_name"},
 			nil,
 		),
@@ -209,6 +219,7 @@ func (e Exporter) getSourcesMetrics(logger *slog.Logger, ch chan<- prometheus.Me
 		ch <- sourcesLastReachRatio.mustNewConstMetric(lastReachRatio, sourceAddress, sourceName)
 		ch <- sourcesLastReachSuccess.mustNewConstMetric(float64(lastReachSuccess), sourceAddress, sourceName)
 		ch <- sourcesLastSample.mustNewConstMetric(r.LatestMeas, sourceAddress, sourceName)
+		ch <- sourcesLastSampleRaw.mustNewConstMetric(r.OrigLatestMeas, sourceAddress, sourceName)
 		ch <- sourcesLastSampleErr.mustNewConstMetric(r.LatestMeasErr, sourceAddress, sourceName)
 		ch <- sourcesPollInterval.mustNewConstMetric(math.Pow(2, float64(r.Poll)), sourceAddress, sourceName)
 		ch <- sourcesStateInfo.mustNewConstMetric(1.0, sourceAddress, sourceName, r.State.String(), r.Mode.String())
