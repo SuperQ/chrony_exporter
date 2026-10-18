@@ -1,5 +1,9 @@
 ## main / unreleased
 
+## 0.14.0 / 2026-08-12
+
+* [FEATURE] Add clients collector #181
+
 ## 0.13.3 / 2026-03-01
 
 * [BUGFIX] Fix tracking RefID names #161

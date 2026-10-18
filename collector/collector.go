@@ -62,6 +62,7 @@ type Exporter struct {
 	collectNtpdata     bool
 	collectTracking    bool
 	collectServerstats bool
+	collectClients     bool
 	chmodSocket        bool
 	dnsLookups         bool
 
@@ -99,6 +100,8 @@ type ChronyCollectorConfig struct {
 	CollectTracking bool
 	// CollectServerstats will configure the exporter to collect `chronyc serverstats`.
 	CollectServerstats bool
+	// CollectClients will configure the exporter to collect `chronyc clients`.
+	CollectClients bool
 }
 
 func NewExporter(conf ChronyCollectorConfig, logger *slog.Logger) Exporter {
@@ -111,6 +114,7 @@ func NewExporter(conf ChronyCollectorConfig, logger *slog.Logger) Exporter {
 		collectNtpdata:     conf.CollectNtpdata,
 		collectTracking:    conf.CollectTracking,
 		collectServerstats: conf.CollectServerstats,
+		collectClients:     conf.CollectClients,
 		chmodSocket:        conf.ChmodSocket,
 		dnsLookups:         conf.DNSLookups,
 
@@ -119,7 +123,7 @@ func NewExporter(conf ChronyCollectorConfig, logger *slog.Logger) Exporter {
 }
 
 // Describe implements prometheus.Collector.
-func (e Exporter) Describe(ch chan<- *prometheus.Desc) {
+func (e Exporter) Describe(_ chan<- *prometheus.Desc) {
 }
 
 func (e Exporter) dial() (net.Conn, func(), error) {
@@ -134,7 +138,7 @@ func (e Exporter) dial() (net.Conn, func(), error) {
 			return nil, func() { os.Remove(local) }, err
 		}
 		if e.chmodSocket {
-			if err := os.Chmod(local, 0666); err != nil {
+			if err := os.Chmod(local, 0o666); err != nil {
 				return nil, func() { conn.Close(); os.Remove(local) }, err
 			}
 		}
@@ -204,6 +208,14 @@ func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 		err = e.getServerstatsMetrics(logger, ch, &client)
 		if err != nil {
 			logger.Debug("Couldn't get serverstats", "err", err)
+			up = 0
+		}
+	}
+
+	if e.collectClients {
+		err = e.getClientsMetrics(logger, ch, &client)
+		if err != nil {
+			logger.Debug("Couldn't get clients", "err", err)
 			up = 0
 		}
 	}

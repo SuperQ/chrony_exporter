@@ -73,6 +73,11 @@ func main() {
 	).Default("false").BoolVar(&conf.CollectServerstats)
 
 	kingpin.Flag(
+		"collector.clients",
+		"Collect clients metrics",
+	).Default("false").BoolVar(&conf.CollectClients)
+
+	kingpin.Flag(
 		"collector.chmod-socket",
 		"Chmod 0666 the receiving unix datagram socket",
 	).Default("false").BoolVar(&conf.ChmodSocket)

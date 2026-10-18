@@ -102,11 +102,11 @@ func (e Exporter) getSourcestatsMetrics(logger *slog.Logger, ch chan<- prometheu
 	if err != nil {
 		return err
 	}
-	logger.Debug("Got 'sources' response", "sources_packet", packet.GetStatus())
+	logger.Debug("Got 'sourcestats' response", "sourcestats_status", packet.GetStatus())
 
 	sources, ok := packet.(*chrony.ReplySources)
 	if !ok {
-		return fmt.Errorf("got wrong 'sources' response: %q", packet)
+		return fmt.Errorf("got wrong 'sourcestats' response: %q", packet)
 	}
 
 	results := make([]chrony.ReplySourceStats, sources.NSources)
@@ -121,19 +121,20 @@ func (e Exporter) getSourcestatsMetrics(logger *slog.Logger, ch chan<- prometheu
 		if !ok {
 			return fmt.Errorf("got wrong 'sourcestats' response: %q", packet)
 		}
+		logger.Debug("Got sourcestats", "source_index", i, "source_stats", sourceStats)
 		results[i] = *sourceStats
 	}
 
 	for _, r := range results {
-		if r.IPAddr.Family == chrony.IPAddrUnspec {
+		if r.IPAddr.Family == chrony.IPAddrID {
 			logger.Debug("Skipping unresolved IP address", "address", r.IPAddr.String())
 			continue
 		}
 		sourceAddress := r.IPAddr.String()
 		sourceName := ""
-		if r.IPAddr.Family == chrony.IPAddrID {
-			// If the chrony.IPAddr.Family is an IPAddrID we just copy the sourceAddress string.
-			sourceName = sourceAddress
+		if r.IPAddr.Family == chrony.IPAddrUnspec {
+			// If the chrony.IPAddr.Family is an IPAddrUnspec, the sourceName is the RefID
+			sourceName = chrony.RefidToString(r.RefID)
 		} else {
 			sourceName = e.dnsLookup(logger, r.IPAddr.ToNetIP())
 		}
