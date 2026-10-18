@@ -126,15 +126,15 @@ func (e Exporter) getSourcestatsMetrics(logger *slog.Logger, ch chan<- prometheu
 	}
 
 	for _, r := range results {
-		if r.IPAddr.Family == chrony.IPAddrUnspec {
+		if r.IPAddr.Family == chrony.IPAddrID {
 			logger.Debug("Skipping unresolved IP address", "address", r.IPAddr.String())
 			continue
 		}
 		sourceAddress := r.IPAddr.String()
 		sourceName := ""
-		if r.IPAddr.Family == chrony.IPAddrID {
-			// If the chrony.IPAddr.Family is an IPAddrID we just copy the sourceAddress string.
-			sourceName = sourceAddress
+		if r.IPAddr.Family == chrony.IPAddrUnspec {
+			// If the chrony.IPAddr.Family is an IPAddrUnspec, the sourceName is the RefID
+			sourceName = chrony.RefidToString(r.RefID)
 		} else {
 			sourceName = e.dnsLookup(logger, r.IPAddr.ToNetIP())
 		}
