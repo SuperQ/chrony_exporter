@@ -1,5 +1,11 @@
 ## main / unreleased
 
+## 0.15.0 / 2026-10-18
+
+* [FEATURE] Add measured offset metric  metric #209
+* [BUGFIX] Fix refclocks in sourcestats and sources #208
+* [BUGFIX] Fix scrape and DNS lookup timeouts #174
+
 ## 0.14.0 / 2026-08-12
 
 * [FEATURE] Add clients collector #181
