@@ -73,22 +73,28 @@ func TestTrackingLeapStatus(t *testing.T) {
 		}
 		close(ch)
 
-		found := false
+		got := map[string]float64{}
 		for m := range ch {
 			if m.Desc() != trackingLeapStatus.desc {
 				continue
 			}
-			found = true
 			var pb dto.Metric
 			if err := m.Write(&pb); err != nil {
 				t.Fatal(err)
 			}
-			if got := pb.GetGauge().GetValue(); got != float64(leap) {
-				t.Errorf("leap_status = %v, want %d", got, leap)
-			}
+			got[pb.GetLabel()[0].GetValue()] = pb.GetGauge().GetValue()
 		}
-		if !found {
-			t.Errorf("leap %d: chrony_tracking_leap_status not exported", leap)
+		if len(got) != len(leapStatusNames) {
+			t.Fatalf("leap %d: got %d leap_status series, want %d", leap, len(got), len(leapStatusNames))
+		}
+		for i, state := range leapStatusNames {
+			want := 0.0
+			if uint16(i) == leap {
+				want = 1.0
+			}
+			if got[state] != want {
+				t.Errorf("leap %d: leap_status{leap_status=%q} = %v, want %v", leap, state, got[state], want)
+			}
 		}
 	}
 }

@@ -153,12 +153,16 @@ var (
 	trackingLeapStatus = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, trackingSubsystem, "leap_status"),
-			"Chrony tracking leap status (0 = Normal, 1 = Insert second, 2 = Delete second, 3 = Not synchronised)",
-			nil,
+			"Chrony tracking leap status, 1 for the current state and 0 for all others.",
+			[]string{"leap_status"},
 			nil,
 		),
 		prometheus.GaugeValue,
 	}
+
+	// leapStatusNames follows chrony's NTP_Leap enum (ntp.h), as printed by
+	// chronyc tracking.
+	leapStatusNames = []string{"normal", "insert second", "delete second", "not synchronised"}
 
 	trackingStratum = typedDesc{
 		prometheus.NewDesc(
@@ -235,7 +239,13 @@ func (e Exporter) getTrackingMetrics(logger *slog.Logger, ch chan<- prometheus.M
 	ch <- trackingUpdateInterval.mustNewConstMetric(tracking.LastUpdateInterval)
 	logger.Debug("Tracking Last Update Interval", "update_interval", tracking.LastUpdateInterval)
 
-	ch <- trackingLeapStatus.mustNewConstMetric(float64(tracking.LeapStatus))
+	for i, state := range leapStatusNames {
+		value := 0.0
+		if uint16(i) == tracking.LeapStatus {
+			value = 1.0
+		}
+		ch <- trackingLeapStatus.mustNewConstMetric(value, state)
+	}
 	logger.Debug("Tracking Leap Status", "leap_status", tracking.LeapStatus)
 
 	ch <- trackingStratum.mustNewConstMetric(float64(tracking.Stratum))
