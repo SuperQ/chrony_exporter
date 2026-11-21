@@ -63,6 +63,7 @@ type Exporter struct {
 	collectTracking    bool
 	collectServerstats bool
 	collectClients     bool
+	collectAuthdata    bool
 	chmodSocket        bool
 	dnsLookups         bool
 
@@ -102,6 +103,8 @@ type ChronyCollectorConfig struct {
 	CollectServerstats bool
 	// CollectClients will configure the exporter to collect `chronyc clients`.
 	CollectClients bool
+	// CollectAuthdata will configure the exporter to collect `chronyc authdata`.
+	CollectAuthdata bool
 }
 
 func NewExporter(conf ChronyCollectorConfig, logger *slog.Logger) Exporter {
@@ -115,6 +118,7 @@ func NewExporter(conf ChronyCollectorConfig, logger *slog.Logger) Exporter {
 		collectTracking:    conf.CollectTracking,
 		collectServerstats: conf.CollectServerstats,
 		collectClients:     conf.CollectClients,
+		collectAuthdata:    conf.CollectAuthdata,
 		chmodSocket:        conf.ChmodSocket,
 		dnsLookups:         conf.DNSLookups,
 
@@ -216,6 +220,14 @@ func (e Exporter) Collect(ch chan<- prometheus.Metric) {
 		err = e.getClientsMetrics(logger, ch, &client)
 		if err != nil {
 			logger.Debug("Couldn't get clients", "err", err)
+			up = 0
+		}
+	}
+
+	if e.collectAuthdata {
+		err = e.getAuthdataMetrics(logger, ch, &client)
+		if err != nil {
+			logger.Debug("Couldn't get authdata", "err", err)
 			up = 0
 		}
 	}

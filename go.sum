@@ -10,8 +10,8 @@ github.com/coreos/go-systemd/v22 v22.7.0 h1:LAEzFkke61DFROc7zNLX/WA2i5J8gYqe0rSj
 github.com/coreos/go-systemd/v22 v22.7.0/go.mod h1:xNUYtjHu2EDXbsxz1i41wouACIwT7Ybq9o0BQhMwD0w=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/facebook/time v0.0.0-20261013172254-9eb5fddff3e9 h1:IIClyCM795zDfXgs9qslDhU6bg3iIqPCiuPO7pcHjqM=
-github.com/facebook/time v0.0.0-20261013172254-9eb5fddff3e9/go.mod h1:waDSb2fIpIPhJtDxe9JIMZ770HyXSNX/QHoJwXBL/ik=
+github.com/facebook/time v0.0.0-20261123103848-0e42d8be34d2 h1:V5lm8TBwu463IFKkwpi8+Kkft4gO8IaSQtDB6aXvtV0=
+github.com/facebook/time v0.0.0-20261123103848-0e42d8be34d2/go.mod h1:tvIlGl1H0y35Opsd4n7WmsVYxaTCHOsGhaGCNw4UsfQ=
 github.com/golang-jwt/jwt/v5 v5.3.1 h1:kYf81DTWFe7t+1VvL7eS+jKFVWaUnK9cB1qbwn63YCY=
 github.com/golang-jwt/jwt/v5 v5.3.1/go.mod h1:fxCRLWMO43lRc8nhHWY6LGqRcf+1gQWArsqaEUEa5bE=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
