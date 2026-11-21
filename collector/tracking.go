@@ -150,6 +150,16 @@ var (
 		prometheus.GaugeValue,
 	}
 
+	trackingLeapStatus = typedDesc{
+		prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, trackingSubsystem, "leap_status"),
+			"Chrony tracking leap status (0 = Normal, 1 = Insert second, 2 = Delete second, 3 = Not synchronised)",
+			nil,
+			nil,
+		),
+		prometheus.GaugeValue,
+	}
+
 	trackingStratum = typedDesc{
 		prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, trackingSubsystem, "stratum"),
@@ -224,6 +234,9 @@ func (e Exporter) getTrackingMetrics(logger *slog.Logger, ch chan<- prometheus.M
 
 	ch <- trackingUpdateInterval.mustNewConstMetric(tracking.LastUpdateInterval)
 	logger.Debug("Tracking Last Update Interval", "update_interval", tracking.LastUpdateInterval)
+
+	ch <- trackingLeapStatus.mustNewConstMetric(float64(tracking.LeapStatus))
+	logger.Debug("Tracking Leap Status", "leap_status", tracking.LeapStatus)
 
 	ch <- trackingStratum.mustNewConstMetric(float64(tracking.Stratum))
 	logger.Debug("Tracking Stratum", "stratum", tracking.Stratum)
