@@ -67,6 +67,7 @@ Flags:
       --[no-]collector.serverstats  
                                  Collect serverstats metrics
       --[no-]collector.clients   Collect clients metrics
+      --[no-]collector.authdata  Collect authdata metrics (requires socket connection)
       --[no-]collector.chmod-socket  
                                  Chmod 0666 the receiving unix datagram socket
       --[no-]collector.dns-lookups  
@@ -119,6 +120,20 @@ When the log is full chronyd reuses the oldest records, so the connected count
 stops at that limit. Increase `clientloglimit` to track more clients, but note
 that it is real memory (up to 2 GB), so set it to match the number of clients
 you expect.
+
+### Authdata collector
+
+`--collector.authdata` exports the per-source authentication state shown by
+`chronyc authdata` (NTS and symmetric keys). It needs chrony 4.0 or later and
+the unix command socket, because chronyd answers this command only locally.
+
+* `chrony_authdata_info{mode,key_id,key_type}` is 1 for every NTP source;
+  `mode` is `none`, `symmetric` or `nts`.
+* `chrony_authdata_key_length_bits` for authenticated sources.
+* For NTS sources: `chrony_authdata_ke_attempts`,
+  `chrony_authdata_last_ke_age_seconds` (absent until the first successful
+  NTS-KE), `chrony_authdata_cookies`, `chrony_authdata_cookie_length_bytes`
+  and `chrony_authdata_nak`.
 
 ## Prometheus Rules
 

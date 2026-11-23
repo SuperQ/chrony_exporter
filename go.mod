@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
-	github.com/facebook/time v0.0.0-20261013172254-9eb5fddff3e9
+	github.com/facebook/time v0.0.0-20261123103848-0e42d8be34d2
 	github.com/google/uuid v1.6.0
 	github.com/prometheus/client_golang v1.25.0
 	github.com/prometheus/client_model v0.6.3
@@ -20,6 +20,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
+	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/mdlayher/socket v0.6.0 // indirect
 	github.com/mdlayher/vsock v1.3.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
