@@ -1,5 +1,10 @@
 ## main / unreleased
 
+## 0.16.0 / 2026-11-23
+
+* [FEATURE] Add authdata collector #216
+* [FEATURE] Add tracking leap status metric #215
+
 ## 0.15.0 / 2026-10-18
 
 * [FEATURE] Add measured offset metric  metric #209
