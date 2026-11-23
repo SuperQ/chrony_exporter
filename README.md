@@ -1,6 +1,6 @@
 # Prometheus Chrony Exporter
 
-[![Build Status](https://circleci.com/gh/SuperQ/chrony_exporter/tree/main.svg?style=svg)](https://circleci.com/gh/SuperQ/chrony_exporter/tree/main)
+[![Build Status](https://github.com/superq/chrony_exporter/actions/workflows/ci.yml/badge.svg)](https://github.com/superq/chrony_exporter/actions/workflows/ci.yml)
 [![Docker Repository on Quay](https://quay.io/repository/superq/chrony-exporter/status "Docker Repository on Quay")](https://quay.io/repository/superq/chrony-exporter)
 [![Go Reference](https://pkg.go.dev/badge/github.com/superq/chrony_exporter.svg)](https://pkg.go.dev/github.com/superq/chrony_exporter)
 
